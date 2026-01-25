@@ -6,6 +6,7 @@
     opacityChange: number;
   }>();
 
+  export let isOpen = false;
   let enabled = true;
   let opacity = 25; // 0-60%, default 25%
 
@@ -21,7 +22,8 @@
   }
 </script>
 
-<div class="border-controls glass">
+{#if isOpen}
+  <div class="border-controls glass">
   <div class="control-header">
     <span class="control-icon">🗺️</span>
     <span class="control-title">Historical Borders</span>
@@ -55,18 +57,31 @@
       />
     </div>
   {/if}
-</div>
+  </div>
+{/if}
 
 <style>
   .border-controls {
     position: fixed;
-    top: 100px;
+    top: 80px;
     right: 20px;
     padding: 16px;
     border-radius: 12px;
-    min-width: 200px;
-    z-index: 500;
+    min-width: 220px;
+    z-index: 900;
     user-select: none;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   .control-header {

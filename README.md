@@ -1,13 +1,17 @@
-# 🗺️ HistoryMap
+# 🗺️ Historical Narrative
 
-An interactive historical map web app that lets you explore history through time, with integration to Dan Carlin's Hardcore History podcast.
+An interactive historical map web app that lets you explore history through time or create AI-generated narrative journeys, with integration to Dan Carlin's Hardcore History podcast.
 
-![HistoryMap](https://img.shields.io/badge/Svelte-5-ff3e00?style=flat-square&logo=svelte)
+![Historical Narrative](https://img.shields.io/badge/Svelte-5-ff3e00?style=flat-square&logo=svelte)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript)
 ![Leaflet](https://img.shields.io/badge/Leaflet-Maps-199900?style=flat-square&logo=leaflet)
 
 ## ✨ Features
 
+- **AI Narrative Journeys**: Generate custom historical narratives using Claude AI
+  - Natural language queries (e.g., "Napoleon's Russian campaign")
+  - Auto-generated step-by-step journeys with maps
+  - Persistent narratives that survive page reloads
 - **Interactive Map**: Dark-themed map powered by Leaflet + CartoDB tiles
 - **Time Slider**: Navigate from 1000 BCE to 2026 CE with play/pause animation
 - **Timeline Modes**:

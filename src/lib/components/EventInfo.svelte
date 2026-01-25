@@ -3,6 +3,8 @@
   import { getEventsForYear, type HistoricalEvent } from '../data/borders';
   import { getEpisodeForYear, type HHEpisode } from '../data/hardcoreHistory';
 
+  export let episodesOpen = false;
+
   let currentYear = 1800;
   let visibleEvents: HistoricalEvent[] = [];
   let relatedEpisode: HHEpisode | undefined;
@@ -26,10 +28,10 @@
   }
 </script>
 
-{#if visibleEvents.length > 0 || relatedEpisode}
+{#if visibleEvents.length > 0 || (relatedEpisode && episodesOpen)}
   <div class="event-info glass">
     {#if visibleEvents.length > 0}
-      <div class="events-section">
+      <div class="events-section" class:has-divider={relatedEpisode && episodesOpen}>
         <h3>📍 Nearby Events</h3>
         {#each visibleEvents as event}
           <div class="event-item">
@@ -48,7 +50,7 @@
       </div>
     {/if}
 
-    {#if relatedEpisode}
+    {#if relatedEpisode && episodesOpen}
       <div class="episode-section">
         <h3>🎙️ Related Episode</h3>
         <div class="related-episode">
@@ -68,12 +70,12 @@
 <style>
   .event-info {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 80px;
+    left: 360px;
     width: 280px;
     padding: 16px;
     border-radius: 16px;
-    z-index: 1000;
+    z-index: 800;
   }
 
   h3 {
@@ -84,6 +86,10 @@
   }
 
   .events-section {
+    margin-bottom: 0;
+  }
+
+  .events-section.has-divider {
     margin-bottom: 16px;
     padding-bottom: 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { timeline, formattedYear, type TimelineMode } from '../stores/timeline';
+  import { timeline, formattedYear } from '../stores/timeline';
+  import { getBorderSnapshotRange } from '../data/borders';
 
   let intervalId: number | null = null;
-  let currentState = { year: 1800, isPlaying: false, playSpeed: 10, mode: 'chronological' as TimelineMode, minYear: -1000, maxYear: 2026 };
+  let currentState = { year: 1800, isPlaying: false, playSpeed: 10, minYear: -1000, maxYear: 2026 };
 
   // Subscribe to timeline store
   const unsubscribe = timeline.subscribe(state => {
@@ -85,12 +86,21 @@
     timeline.setYear(parseInt(target.value));
   }
 
-  function setMode(mode: TimelineMode) {
-    timeline.setMode(mode);
-  }
-
   let yearDisplay: string;
   formattedYear.subscribe(y => yearDisplay = y);
+
+  // Get the border snapshot range for display
+  function getDisplayRange(year: number): string {
+    const range = getBorderSnapshotRange(year);
+    const startStr = range.startYear < 0 ? `${Math.abs(range.startYear)} BCE` : `${range.startYear} CE`;
+    const endStr = range.endYear < 0 ? `${Math.abs(range.endYear)} BCE` : `${range.endYear} CE`;
+
+    if (range.startYear === range.endYear) {
+      return startStr;
+    }
+
+    return `${startStr} — ${endStr}`;
+  }
 </script>
 
 <div class="timeline-container glass">
@@ -138,6 +148,9 @@
     </div>
 
     <div class="speed-control">
+      <div class="timeslot-range">
+        <span>Showing: {getDisplayRange(currentState.year)}</span>
+      </div>
       <span>Speed: {currentState.playSpeed}x</span>
     </div>
   </div>
@@ -153,30 +166,6 @@
       class="slider"
     />
     <span class="slider-label">{currentState.maxYear}</span>
-  </div>
-
-  <div class="mode-selector">
-    <button 
-      class="mode-btn" 
-      class:active={currentState.mode === 'chronological'}
-      on:click={() => setMode('chronological')}
-    >
-      📅 Chronological
-    </button>
-    <button 
-      class="mode-btn" 
-      class:active={currentState.mode === 'hh-release'}
-      on:click={() => setMode('hh-release')}
-    >
-      🎙️ HH Release Order
-    </button>
-    <button 
-      class="mode-btn" 
-      class:active={currentState.mode === 'hh-chronological'}
-      on:click={() => setMode('hh-chronological')}
-    >
-      ⏳ HH by Period
-    </button>
   </div>
 
   <div class="keyboard-hints">
@@ -246,10 +235,20 @@
   }
 
   .speed-control {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     font-size: 12px;
     opacity: 0.7;
-    min-width: 80px;
+    min-width: 120px;
     text-align: right;
+  }
+
+  .timeslot-range {
+    font-size: 10px;
+    opacity: 0.6;
+    font-weight: 500;
   }
 
   .slider-container {
@@ -289,33 +288,6 @@
 
   .slider::-webkit-slider-thumb:hover {
     transform: scale(1.2);
-  }
-
-  .mode-selector {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .mode-btn {
-    flex: 1;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: inherit;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-  }
-
-  .mode-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .mode-btn.active {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3));
-    border-color: rgba(59, 130, 246, 0.5);
   }
 
   .keyboard-hints {

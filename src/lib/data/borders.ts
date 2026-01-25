@@ -196,6 +196,41 @@ export function getEventsInRange(startYear: number, endYear: number): Historical
   return historicalEvents.filter(e => e.year >= startYear && e.year <= endYear);
 }
 
+// Get the border snapshot range for a given year
+export function getBorderSnapshotRange(year: number): { startYear: number; endYear: number; description: string } {
+  const sortedSnapshots = [...BORDER_SNAPSHOTS].sort((a, b) => a.year - b.year);
+
+  // Find the two snapshots that bracket this year
+  let prevSnapshot = sortedSnapshots[0];
+  let nextSnapshot = sortedSnapshots[sortedSnapshots.length - 1];
+
+  for (let i = 0; i < sortedSnapshots.length; i++) {
+    if (sortedSnapshots[i].year <= year) {
+      prevSnapshot = sortedSnapshots[i];
+    }
+    if (sortedSnapshots[i].year > year && i > 0) {
+      nextSnapshot = sortedSnapshots[i];
+      break;
+    }
+  }
+
+  // If we're at or past the last snapshot, use the last two
+  if (year >= sortedSnapshots[sortedSnapshots.length - 1].year) {
+    const lastIndex = sortedSnapshots.length - 1;
+    return {
+      startYear: sortedSnapshots[lastIndex].year,
+      endYear: sortedSnapshots[lastIndex].year,
+      description: sortedSnapshots[lastIndex].description
+    };
+  }
+
+  return {
+    startYear: prevSnapshot.year,
+    endYear: nextSnapshot.year,
+    description: prevSnapshot.description
+  };
+}
+
 // ============================================================================
 // HISTORICAL BORDERS SYSTEM
 // ============================================================================

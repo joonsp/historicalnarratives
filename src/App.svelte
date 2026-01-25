@@ -4,9 +4,18 @@
   import EpisodePanel from './lib/components/EpisodePanel.svelte';
   import EventInfo from './lib/components/EventInfo.svelte';
   import BorderControls from './lib/components/BorderControls.svelte';
+  import NarrativePlayer from './lib/components/NarrativePlayer.svelte';
+  import StepCard from './lib/components/StepCard.svelte';
+  import NarrativeLibrary from './lib/components/NarrativeLibrary.svelte';
+  import NarrativePrompt from './lib/components/NarrativePrompt.svelte';
+  import ControlBar from './lib/components/ControlBar.svelte';
+  import { isNarrativeMode } from './lib/stores/narrative';
   import type { HHEpisode } from './lib/data/hardcoreHistory';
 
   let mapComponent: Map;
+  let episodesOpen = true;
+  let narrativesOpen = false;
+  let bordersOpen = false;
 
   function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
     const episode = event.detail;
@@ -20,21 +29,62 @@
   function handleOpacityChange(event: CustomEvent<number>) {
     mapComponent?.setBorderOpacity(event.detail);
   }
+
+  function toggleEpisodes() {
+    episodesOpen = !episodesOpen;
+    if (episodesOpen) {
+      narrativesOpen = false;
+    }
+  }
+
+  function toggleNarratives() {
+    narrativesOpen = !narrativesOpen;
+    if (narrativesOpen) {
+      episodesOpen = false;
+    }
+  }
+
+  function toggleBorders() {
+    bordersOpen = !bordersOpen;
+  }
 </script>
 
 <main>
   <Map bind:this={mapComponent} />
-  <EpisodePanel on:episodeSelect={handleEpisodeSelect} />
-  <EventInfo />
-  <TimeSlider />
+
+  <!-- Control Bar -->
+  <ControlBar
+    {episodesOpen}
+    {narrativesOpen}
+    {bordersOpen}
+    on:openEpisodes={toggleEpisodes}
+    on:openNarratives={toggleNarratives}
+    on:openBorders={toggleBorders}
+  />
+
+  <!-- Conditionally show narrative UI or regular UI -->
+  {#if $isNarrativeMode}
+    <!-- Narrative Mode -->
+    <NarrativePlayer />
+    <StepCard />
+  {:else}
+    <!-- Free Explore Mode -->
+    <EpisodePanel isOpen={episodesOpen} on:episodeSelect={handleEpisodeSelect} />
+    <EventInfo {episodesOpen} />
+    <TimeSlider />
+    <NarrativeLibrary isOpen={narrativesOpen} />
+  {/if}
+
+  <!-- Border controls panel -->
   <BorderControls
+    isOpen={bordersOpen}
     on:toggleBorders={handleToggleBorders}
     on:opacityChange={handleOpacityChange}
   />
 
   <div class="title-overlay glass">
-    <h1>🗺️ HistoryMap</h1>
-    <p>Explore history through time</p>
+    <h1>🗺️ Historical Narrative</h1>
+    <p>{$isNarrativeMode ? 'Narrative Journey' : 'Explore history through time or create AI-generated journeys'}</p>
   </div>
 </main>
 

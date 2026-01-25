@@ -1,16 +1,16 @@
 <script lang="ts">
   import { timeline, type TimelineMode } from '../stores/timeline';
-  import { 
-    hardcoreHistoryEpisodes, 
-    getEpisodesByReleaseDate, 
+  import {
+    hardcoreHistoryEpisodes,
+    getEpisodesByReleaseDate,
     getEpisodesByPeriod,
-    type HHEpisode 
+    type HHEpisode
   } from '../data/hardcoreHistory';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher<{ episodeSelect: HHEpisode }>();
 
-  let isOpen = true;
+  export let isOpen = true;
   let searchQuery = '';
   let currentMode: TimelineMode = 'chronological';
   let currentYear = 1800;
@@ -76,22 +76,46 @@
   }
 </script>
 
-<div class="panel-container" class:collapsed={!isOpen}>
-  <button class="toggle-btn" on:click={() => isOpen = !isOpen}>
-    {isOpen ? '◀' : '▶'}
-  </button>
+{#if isOpen}
+  <div class="panel glass">
+    <div class="panel-header">
+      <h2>🎙️ Hardcore History</h2>
 
-  {#if isOpen}
-    <div class="panel glass">
-      <div class="panel-header">
-        <h2>🎙️ Hardcore History</h2>
-        <input
-          type="text"
-          placeholder="Search episodes..."
-          bind:value={searchQuery}
-          class="search-input"
-        />
+      <!-- Timeline Mode Selector -->
+      <div class="mode-selector">
+        <button
+          class="mode-btn"
+          class:active={currentMode === 'chronological'}
+          on:click={() => timeline.setMode('chronological')}
+          title="Chronological Order"
+        >
+          📅 Chronological
+        </button>
+        <button
+          class="mode-btn"
+          class:active={currentMode === 'hh-release'}
+          on:click={() => timeline.setMode('hh-release')}
+          title="Release Order"
+        >
+          🎙️ Release
+        </button>
+        <button
+          class="mode-btn"
+          class:active={currentMode === 'hh-chronological'}
+          on:click={() => timeline.setMode('hh-chronological')}
+          title="Historical Order"
+        >
+          ⏳ Historical
+        </button>
       </div>
+
+      <input
+        type="text"
+        placeholder="Search episodes..."
+        bind:value={searchQuery}
+        class="search-input"
+      />
+    </div>
 
       <div class="episodes-list">
         {#each [...groupedEpisodes] as [series, seriesEpisodes]}
@@ -140,52 +164,33 @@
           </div>
         {/each}
       </div>
-    </div>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style>
-  .panel-container {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    display: flex;
-    transition: transform 0.3s ease;
-  }
-
-  .panel-container.collapsed {
-    transform: translateX(-320px);
-  }
-
-  .toggle-btn {
-    position: absolute;
-    right: -32px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 32px;
-    height: 64px;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: none;
-    border-radius: 0 8px 8px 0;
-    color: white;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .toggle-btn:hover {
-    background: rgba(30, 41, 59, 0.9);
-  }
-
   .panel {
+    position: fixed;
+    top: 80px;
+    left: 20px;
     width: 320px;
     max-height: calc(100vh - 160px);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    z-index: 900;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
   .panel-header {
@@ -197,6 +202,39 @@
     margin: 0 0 12px;
     font-size: 18px;
     font-weight: 600;
+  }
+
+  .mode-selector {
+    display: flex;
+    gap: 0.375rem;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .mode-btn {
+    flex: 1;
+    min-width: fit-content;
+    padding: 0.5rem 0.625rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: #cbd5e1;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .mode-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .mode-btn.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
   }
 
   .search-input {

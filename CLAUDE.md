@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HistoryMap is an interactive historical map web app built with Svelte 5 that visualizes historical events and integrates Dan Carlin's Hardcore History podcast metadata. Users can explore history through time using a timeline slider, view historical events on a map, and navigate to specific time periods via podcast episodes.
+Historical Narrative is an interactive historical map web app built with Svelte 5 that visualizes historical events and integrates Dan Carlin's Hardcore History podcast metadata. Users can explore history through time using a timeline slider, view historical events on a map, navigate to specific time periods via podcast episodes, and create AI-generated narrative journeys using Claude.
 
 ## Development Commands
 
