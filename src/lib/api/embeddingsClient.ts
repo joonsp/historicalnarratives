@@ -37,7 +37,9 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     return [];
   }
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  // Use relative URL in production (Vercel), localhost in development
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
 
   const response = await fetch(`${backendUrl}/api/embeddings`, {
     method: 'POST',
@@ -69,7 +71,9 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  * This is a quick check that doesn't consume tokens
  */
 export async function checkEmbeddingsAvailability(): Promise<boolean> {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  // Use relative URL in production (Vercel), localhost in development
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
 
   try {
     const response = await fetch(`${backendUrl}/api/health`, {

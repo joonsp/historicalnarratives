@@ -195,7 +195,9 @@ export async function generateNarrative(request: GenerationRequest): Promise<Nar
   // Step 4: No match found - generate new narrative
   console.log('🤖 Generating new narrative for:', request.query);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  // Use relative URL in production (Vercel), localhost in development
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
 
   const response = await fetch(`${backendUrl}/api/generate-narrative`, {
     method: 'POST',
@@ -248,7 +250,9 @@ export async function generateNarrative(request: GenerationRequest): Promise<Nar
  * This makes a quick health check to the backend
  */
 export async function checkAIAvailability(): Promise<boolean> {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  // Use relative URL in production (Vercel), localhost in development
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
 
   try {
     const response = await fetch(`${backendUrl}/api/health`, {
