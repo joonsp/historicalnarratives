@@ -86,6 +86,21 @@
     <h1>🗺️ Historical Narrative</h1>
     <p>{$isNarrativeMode ? 'Narrative Journey' : 'Explore history through time or create AI-generated journeys'}</p>
   </div>
+
+  <!-- Credits footer -->
+  <div class="credits-footer">
+    <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">
+      Historical Borders
+    </a>
+    <span>•</span>
+    <a href="https://carto.com/" target="_blank" rel="noopener">
+      CartoDB
+    </a>
+    <span>•</span>
+    <a href="https://www.dancarlin.com/hardcore-history-series/" target="_blank" rel="noopener">
+      Hardcore History
+    </a>
+  </div>
 </main>
 
 <style>
@@ -122,5 +137,36 @@
     margin: 4px 0 0;
     font-size: 12px;
     opacity: 0.6;
+  }
+
+  .credits-footer {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+
+  .credits-footer:hover {
+    opacity: 0.8;
+  }
+
+  .credits-footer a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .credits-footer a:hover {
+    color: #60a5fa;
+  }
+
+  .credits-footer span {
+    color: #64748b;
   }
 </style>

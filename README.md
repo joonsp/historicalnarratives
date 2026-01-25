@@ -45,6 +45,16 @@ npm run build
 | `Shift + ←/→` | Jump 50 years |
 | `↑` / `↓` | Increase/decrease speed |
 
+## 📚 Credits
+
+Data sources and acknowledgements:
+- **Historical Borders**: [aourednik/historical-basemaps](https://github.com/aourednik/historical-basemaps) (GPL-3.0)
+- **Map Tiles**: CartoDB Dark Matter (CC BY 3.0)
+- **Podcast Metadata**: Dan Carlin's Hardcore History (manually curated)
+- **AI Generation**: Anthropic Claude Sonnet 4.5
+
+See [CREDITS.md](CREDITS.md) for full acknowledgements.
+
 ## 🎙️ Hardcore History Integration
 
 The app includes metadata for major Hardcore History series:
