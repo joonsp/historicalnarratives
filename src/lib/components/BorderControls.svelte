@@ -62,24 +62,24 @@
 
 <style>
   .border-controls {
-    position: fixed;
-    top: 80px;
-    right: 20px;
     padding: 16px;
     border-radius: 12px;
     min-width: 220px;
-    z-index: 900;
     user-select: none;
     animation: slideIn 0.3s ease-out;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 10px;
   }
 
   @keyframes slideIn {
     from {
-      transform: translateX(20px);
+      transform: translateY(-10px);
       opacity: 0;
     }
     to {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
   }
@@ -200,11 +200,12 @@
 
   @media (max-width: 768px) {
     .border-controls {
-      top: 80px;
-      right: 10px;
-      left: 10px;
       min-width: unset;
       padding: 12px;
+      width: 100%;
+      max-height: calc(100vh - 150px);
+      overflow-y: auto;
+      margin-left: 0;
     }
   }
 </style>

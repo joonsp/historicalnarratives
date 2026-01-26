@@ -70,24 +70,19 @@
 
 <style>
   .narrative-prompt {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
     width: auto;
-    max-width: 500px;
+    max-width: 600px;
     padding: 0.5rem;
-    z-index: 999;
     animation: slideIn 0.3s ease-out;
   }
 
   @keyframes slideIn {
     from {
-      transform: translate(-50%, -10px);
+      transform: translateY(10px);
       opacity: 0;
     }
     to {
-      transform: translate(-50%, 0);
+      transform: translateY(0);
       opacity: 1;
     }
   }
@@ -190,7 +185,6 @@
   /* Mobile responsive */
   @media (max-width: 768px) {
     .narrative-prompt {
-      top: 10px;
       max-width: calc(100vw - 20px);
     }
 

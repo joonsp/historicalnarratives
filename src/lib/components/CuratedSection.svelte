@@ -1,11 +1,18 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import EpisodePanel from './EpisodePanel.svelte';
+  import type { HHEpisode } from '../data/hardcoreHistory';
 
   const dispatch = createEventDispatcher<{
     openEpisodes: void;
+    episodeSelect: HHEpisode;
   }>();
 
   export let episodesOpen = false;
+
+  function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
+    dispatch('episodeSelect', event.detail);
+  }
 </script>
 
 <div class="curated-section glass">
@@ -18,6 +25,12 @@
   >
     🎙️ HH Episodes
   </button>
+
+  {#if episodesOpen}
+    <div class="panel-container">
+      <EpisodePanel isOpen={episodesOpen} on:episodeSelect={handleEpisodeSelect} />
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -85,6 +98,10 @@
 
   .curated-btn.active:hover {
     background: rgba(59, 130, 246, 0.3);
+  }
+
+  .panel-container {
+    margin-top: 0.5rem;
   }
 
   /* Mobile responsive */

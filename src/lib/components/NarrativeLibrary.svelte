@@ -266,25 +266,26 @@
 
 <style>
   .narrative-library {
-    position: fixed;
-    top: 80px;
-    right: 20px;
     width: 420px;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 300px);
     padding: 1.5rem;
-    z-index: 900;
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease-out;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-left: 10px;
   }
 
   @keyframes slideIn {
     from {
-      transform: translateX(20px);
+      transform: translateY(-10px);
       opacity: 0;
     }
     to {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
     }
   }
@@ -683,10 +684,9 @@
   /* Mobile responsive */
   @media (max-width: 768px) {
     .narrative-library {
-      top: 80px;
-      right: 10px;
-      width: calc(100% - 20px);
-      max-height: calc(100vh - 100px);
+      width: 100%;
+      max-height: calc(100vh - 150px);
+      margin-left: 0;
     }
 
     .theme-filters {

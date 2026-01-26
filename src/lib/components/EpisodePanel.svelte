@@ -4,6 +4,7 @@
     hardcoreHistoryEpisodes,
     getEpisodesByReleaseDate,
     getEpisodesByPeriod,
+    getEpisodeForYear,
     type HHEpisode
   } from '../data/hardcoreHistory';
   import { createEventDispatcher } from 'svelte';
@@ -15,20 +16,21 @@
   let currentMode: TimelineMode = 'chronological';
   let currentYear = 1800;
   let collapsedSeries = new Set<string>();
+  let selectedEpisodeId: string | null = null;
 
   timeline.subscribe(state => {
     currentMode = state.mode;
     currentYear = state.year;
   });
 
-  $: episodes = currentMode === 'hh-release' 
-    ? getEpisodesByReleaseDate() 
+  $: episodes = currentMode === 'hh-release'
+    ? getEpisodesByReleaseDate()
     : currentMode === 'hh-chronological'
     ? getEpisodesByPeriod()
     : getEpisodesByPeriod();
 
-  $: filteredEpisodes = searchQuery 
-    ? episodes.filter(ep => 
+  $: filteredEpisodes = searchQuery
+    ? episodes.filter(ep =>
         ep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ep.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ep.series?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -36,6 +38,12 @@
     : episodes;
 
   $: groupedEpisodes = groupBySeries(filteredEpisodes);
+
+  // Get related episode for current year
+  $: relatedEpisode = getEpisodeForYear(currentYear);
+
+  // Show related episode only if no episode is explicitly selected
+  $: showRelatedEpisode = !selectedEpisodeId && relatedEpisode;
 
   function groupBySeries(eps: HHEpisode[]): Map<string, HHEpisode[]> {
     const groups = new Map<string, HHEpisode[]>();
@@ -50,6 +58,7 @@
   }
 
   function selectEpisode(episode: HHEpisode) {
+    selectedEpisodeId = episode.id;
     timeline.setYear(episode.periodStart);
     dispatch('episodeSelect', episode);
   }
@@ -80,6 +89,32 @@
   <div class="panel glass">
     <div class="panel-header">
       <h2>🎙️ Hardcore History</h2>
+
+      {#if showRelatedEpisode}
+        <div class="related-episode-section">
+          <div class="related-header">
+            <span class="related-icon">🎙️</span>
+            <span class="related-title">Episode Related to selected times</span>
+          </div>
+          <button
+            class="episode-card related"
+            on:click={() => selectEpisode(relatedEpisode)}
+          >
+            <div class="episode-header">
+              <span class="episode-number">#{relatedEpisode.number || '+'}</span>
+              <span class="episode-title">{relatedEpisode.title}</span>
+            </div>
+            <div class="episode-meta">
+              <span class="period">
+                {formatYear(relatedEpisode.periodStart)} — {formatYear(relatedEpisode.periodEnd)}
+              </span>
+              <span class="regions">{relatedEpisode.regions.slice(0, 2).join(', ')}</span>
+            </div>
+            <p class="episode-desc">{relatedEpisode.description}</p>
+          </button>
+        </div>
+        <div class="separator"></div>
+      {/if}
 
       <!-- Timeline Mode Selector -->
       <div class="mode-selector">
@@ -169,27 +204,34 @@
 
 <style>
   .panel {
-    position: fixed;
-    top: 130px;
-    left: 20px;
     width: 320px;
-    max-height: calc(100vh - 180px);
+    max-height: calc(100vh - 300px);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    z-index: 900;
     animation: slideIn 0.3s ease-out;
+    overflow-y: auto;
+    margin-right: 10px;
   }
 
   @keyframes slideIn {
     from {
-      transform: translateX(-20px);
+      transform: translateY(-10px);
       opacity: 0;
     }
     to {
-      transform: translateX(0);
+      transform: translateY(0);
       opacity: 1;
+    }
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .panel {
+      width: 100%;
+      max-height: calc(100vh - 150px);
+      margin-right: 0;
     }
   }
 
@@ -393,5 +435,46 @@
 
   .episode-link:hover {
     color: #93c5fd;
+  }
+
+  .separator {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    margin: 12px 0;
+  }
+
+  .related-episode-section {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+
+  .related-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+
+  .related-icon {
+    font-size: 14px;
+  }
+
+  .related-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+  }
+
+  .episode-card.related {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  .episode-card.related:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
+    border-color: rgba(59, 130, 246, 0.5);
   }
 </style>

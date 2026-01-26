@@ -2,6 +2,10 @@
   import { onMount, onDestroy } from 'svelte';
   import { timeline, formattedYear } from '../stores/timeline';
   import { getBorderSnapshotRange } from '../data/borders';
+  import NarrativePrompt from './NarrativePrompt.svelte';
+  import { isNarrativeMode } from '../stores/narrative';
+
+  export let hideOnMobile = false;
 
   let intervalId: number | null = null;
   let currentState = { year: 1800, isPlaying: false, playSpeed: 10, minYear: -1000, maxYear: 2026 };
@@ -103,6 +107,12 @@
   }
 </script>
 
+<div class="timeline-wrapper" class:hide-on-mobile={hideOnMobile}>
+  <!-- AI Narrative Generation Input -->
+  {#if !$isNarrativeMode}
+    <NarrativePrompt />
+  {/if}
+
 <div class="timeline-container glass">
   <div class="timeline-header">
     <div class="year-display">
@@ -177,18 +187,28 @@
     </div>
   </div>
 </div>
+</div>
 
 <style>
-  .timeline-container {
+  .timeline-wrapper {
     position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    min-height: 20px;
+    margin-bottom: 20px;
+  }
+
+  .timeline-container {
     padding: 16px 24px;
     border-radius: 16px;
     min-width: 600px;
     max-width: 90vw;
-    z-index: 1000;
   }
 
   .timeline-header {
@@ -314,5 +334,91 @@
     gap: 20px;
     font-size: 10px;
     opacity: 0.5;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .timeline-wrapper {
+      bottom: 10px;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .timeline-wrapper.hide-on-mobile {
+      display: none;
+    }
+
+    .timeline-container {
+      padding: 8px 12px;
+      min-width: unset;
+      width: auto;
+      max-width: calc(100vw - 20px);
+    }
+
+    .timeline-header {
+      margin-bottom: 8px;
+    }
+
+    .year-display {
+      min-width: unset;
+      width: 38px;
+      text-align: center;
+    }
+
+    .year {
+      font-size: 14px;
+      writing-mode: horizontal-tb;
+    }
+
+    .controls {
+      gap: 4px;
+    }
+
+    .control-btn, .play-btn {
+      padding: 6px 8px;
+      font-size: 14px;
+      border-radius: 6px;
+    }
+
+    .play-btn {
+      padding: 6px 12px;
+    }
+
+    .speed-control {
+      min-width: unset;
+      font-size: 10px;
+    }
+
+    .timeslot-display {
+      margin-bottom: 8px;
+      padding: 6px 10px;
+    }
+
+    .timeslot-display span {
+      font-size: 11px;
+    }
+
+    .slider-container {
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .slider-label {
+      font-size: 10px;
+      min-width: 45px;
+    }
+
+    .slider {
+      height: 4px;
+    }
+
+    .slider::-webkit-slider-thumb {
+      width: 16px;
+      height: 16px;
+    }
+
+    .keyboard-hints {
+      display: none;
+    }
   }
 </style>

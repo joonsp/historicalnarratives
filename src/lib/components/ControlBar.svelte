@@ -1,35 +1,65 @@
 <script lang="ts">
   import { isNarrativeMode } from '../stores/narrative';
   import { createEventDispatcher } from 'svelte';
+  import NarrativeLibrary from './NarrativeLibrary.svelte';
+  import BorderControls from './BorderControls.svelte';
 
   const dispatch = createEventDispatcher<{
     openNarratives: void;
     openBorders: void;
+    toggleBorders: void;
+    opacityChange: number;
   }>();
 
   export let narrativesOpen = false;
   export let bordersOpen = false;
+
+  function handleToggleBorders() {
+    dispatch('toggleBorders');
+  }
+
+  function handleOpacityChange(event: CustomEvent<number>) {
+    dispatch('opacityChange', event.detail);
+  }
 </script>
 
 <div class="control-bar glass">
   {#if !$isNarrativeMode}
-    <button
-      class="control-btn"
-      class:active={bordersOpen}
-      on:click={() => dispatch('openBorders')}
-      title="Historical Borders"
-    >
-      🗺️ <span class="btn-label">Borders</span>
-    </button>
+    <div class="section-label">Narratives</div>
+    <div class="button-row">
+      <button
+        class="control-btn"
+        class:active={bordersOpen}
+        on:click={() => dispatch('openBorders')}
+        title="Historical Borders"
+      >
+        🗺️ <span class="btn-label">Borders</span>
+      </button>
 
-    <button
-      class="control-btn"
-      class:active={narrativesOpen}
-      on:click={() => dispatch('openNarratives')}
-      title="Historical Narratives"
-    >
-      📚 <span class="btn-label">Narratives</span>
-    </button>
+      <button
+        class="control-btn"
+        class:active={narrativesOpen}
+        on:click={() => dispatch('openNarratives')}
+        title="Historical Narratives"
+      >
+        📚 <span class="btn-label">Narratives</span>
+      </button>
+    </div>
+
+    {#if narrativesOpen || bordersOpen}
+      <div class="panel-container">
+        {#if narrativesOpen}
+          <NarrativeLibrary isOpen={narrativesOpen} />
+        {/if}
+        {#if bordersOpen}
+          <BorderControls
+            isOpen={bordersOpen}
+            on:toggleBorders={handleToggleBorders}
+            on:opacityChange={handleOpacityChange}
+          />
+        {/if}
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -39,11 +69,32 @@
     top: 20px;
     right: 20px;
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 12px;
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    text-align: right;
+  }
+
+  .button-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+
+  .panel-container {
+    margin-top: 0.5rem;
   }
 
   @keyframes slideIn {

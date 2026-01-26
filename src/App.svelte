@@ -1,13 +1,9 @@
 <script lang="ts">
   import Map from './lib/components/Map.svelte';
   import TimeSlider from './lib/components/TimeSlider.svelte';
-  import EpisodePanel from './lib/components/EpisodePanel.svelte';
   import EventInfo from './lib/components/EventInfo.svelte';
-  import BorderControls from './lib/components/BorderControls.svelte';
   import NarrativePlayer from './lib/components/NarrativePlayer.svelte';
   import StepCard from './lib/components/StepCard.svelte';
-  import NarrativeLibrary from './lib/components/NarrativeLibrary.svelte';
-  import NarrativePrompt from './lib/components/NarrativePrompt.svelte';
   import ControlBar from './lib/components/ControlBar.svelte';
   import CuratedSection from './lib/components/CuratedSection.svelte';
   import { isNarrativeMode } from './lib/stores/narrative';
@@ -33,11 +29,16 @@
 
   function toggleEpisodes() {
     episodesOpen = !episodesOpen;
+    if (episodesOpen) {
+      narrativesOpen = false;
+      bordersOpen = false;
+    }
   }
 
   function toggleNarratives() {
     narrativesOpen = !narrativesOpen;
     if (narrativesOpen) {
+      episodesOpen = false;
       bordersOpen = false;
     }
   }
@@ -45,6 +46,7 @@
   function toggleBorders() {
     bordersOpen = !bordersOpen;
     if (bordersOpen) {
+      episodesOpen = false;
       narrativesOpen = false;
     }
   }
@@ -57,6 +59,7 @@
   <CuratedSection
     {episodesOpen}
     on:openEpisodes={toggleEpisodes}
+    on:episodeSelect={handleEpisodeSelect}
   />
 
   <!-- Control Bar (top-right) -->
@@ -65,6 +68,8 @@
     {bordersOpen}
     on:openNarratives={toggleNarratives}
     on:openBorders={toggleBorders}
+    on:toggleBorders={handleToggleBorders}
+    on:opacityChange={handleOpacityChange}
   />
 
   <!-- Conditionally show narrative UI or regular UI -->
@@ -74,22 +79,8 @@
     <StepCard />
   {:else}
     <!-- Free Explore Mode -->
-    <EpisodePanel isOpen={episodesOpen} on:episodeSelect={handleEpisodeSelect} />
     <EventInfo {episodesOpen} />
-    <TimeSlider />
-    <NarrativeLibrary isOpen={narrativesOpen} />
-  {/if}
-
-  <!-- Border controls panel -->
-  <BorderControls
-    isOpen={bordersOpen}
-    on:toggleBorders={handleToggleBorders}
-    on:opacityChange={handleOpacityChange}
-  />
-
-  <!-- AI Narrative Generation Input -->
-  {#if !$isNarrativeMode}
-    <NarrativePrompt />
+    <TimeSlider hideOnMobile={episodesOpen || narrativesOpen || bordersOpen} />
   {/if}
 
   <!-- Credits footer -->
