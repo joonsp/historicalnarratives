@@ -148,30 +148,33 @@
     </div>
 
     <div class="speed-control">
-      <div class="timeslot-range">
-        <span>Showing: {getDisplayRange(currentState.year)}</span>
-      </div>
       <span>Speed: {currentState.playSpeed}x</span>
     </div>
   </div>
 
-  <div class="slider-container">
-    <span class="slider-label">{currentState.minYear < 0 ? `${Math.abs(currentState.minYear)} BCE` : currentState.minYear}</span>
-    <input
-      type="range"
-      min={currentState.minYear}
-      max={currentState.maxYear}
-      value={currentState.year}
-      on:input={handleSliderInput}
-      class="slider"
-    />
-    <span class="slider-label">{currentState.maxYear}</span>
+  <div class="timeslot-display">
+    <span>Showing timescale: {getDisplayRange(currentState.year)}</span>
   </div>
 
-  <div class="keyboard-hints">
-    <span>Space: Play/Pause</span>
-    <span>←→: Navigate</span>
-    <span>↑↓: Speed</span>
+  <div class="timeline-body">
+    <div class="slider-container">
+      <span class="slider-label">{currentState.minYear < 0 ? `${Math.abs(currentState.minYear)} BCE` : currentState.minYear}</span>
+      <input
+        type="range"
+        min={currentState.minYear}
+        max={currentState.maxYear}
+        value={currentState.year}
+        on:input={handleSliderInput}
+        class="slider"
+      />
+      <span class="slider-label">{currentState.maxYear}</span>
+    </div>
+
+    <div class="keyboard-hints">
+      <span>Space: Play/Pause</span>
+      <span>←→: Navigate</span>
+      <span>↑↓: Speed</span>
+    </div>
   </div>
 </div>
 
@@ -236,19 +239,34 @@
 
   .speed-control {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: center;
     font-size: 12px;
     opacity: 0.7;
-    min-width: 120px;
+    min-width: 80px;
     text-align: right;
   }
 
-  .timeslot-range {
-    font-size: 10px;
-    opacity: 0.6;
-    font-weight: 500;
+  .timeslot-display {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .timeslot-display span {
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .timeline-body {
+    display: flex;
+    flex-direction: column;
   }
 
   .slider-container {

@@ -200,8 +200,7 @@
 
   @media (max-width: 768px) {
     .border-controls {
-      top: auto;
-      bottom: 100px;
+      top: 80px;
       right: 10px;
       left: 10px;
       min-width: unset;

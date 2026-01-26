@@ -170,10 +170,10 @@
 <style>
   .panel {
     position: fixed;
-    top: 80px;
+    top: 130px;
     left: 20px;
     width: 320px;
-    max-height: calc(100vh - 160px);
+    max-height: calc(100vh - 180px);
     border-radius: 16px;
     overflow: hidden;
     display: flex;

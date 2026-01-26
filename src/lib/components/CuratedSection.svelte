@@ -1,49 +1,37 @@
 <script lang="ts">
-  import { isNarrativeMode } from '../stores/narrative';
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher<{
-    openNarratives: void;
-    openBorders: void;
+    openEpisodes: void;
   }>();
 
-  export let narrativesOpen = false;
-  export let bordersOpen = false;
+  export let episodesOpen = false;
 </script>
 
-<div class="control-bar glass">
-  {#if !$isNarrativeMode}
-    <button
-      class="control-btn"
-      class:active={bordersOpen}
-      on:click={() => dispatch('openBorders')}
-      title="Historical Borders"
-    >
-      🗺️ <span class="btn-label">Borders</span>
-    </button>
-
-    <button
-      class="control-btn"
-      class:active={narrativesOpen}
-      on:click={() => dispatch('openNarratives')}
-      title="Historical Narratives"
-    >
-      📚 <span class="btn-label">Narratives</span>
-    </button>
-  {/if}
+<div class="curated-section glass">
+  <div class="section-label">Curated Stuff</div>
+  <button
+    class="curated-btn"
+    class:active={episodesOpen}
+    on:click={() => dispatch('openEpisodes')}
+    title="Hardcore History Episodes"
+  >
+    🎙️ HH Episodes
+  </button>
 </div>
 
 <style>
-  .control-bar {
+  .curated-section {
     position: fixed;
     top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    left: 20px;
+    padding: 0.75rem;
     border-radius: 12px;
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   @keyframes slideIn {
@@ -57,7 +45,16 @@
     }
   }
 
-  .control-btn {
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .curated-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -73,43 +70,39 @@
     white-space: nowrap;
   }
 
-  .control-btn:hover {
+  .curated-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.25);
     color: #f1f5f9;
     transform: translateY(-2px);
   }
 
-  .control-btn.active {
+  .curated-btn.active {
     background: rgba(59, 130, 246, 0.2);
     border-color: rgba(59, 130, 246, 0.4);
     color: #60a5fa;
   }
 
-  .control-btn.active:hover {
+  .curated-btn.active:hover {
     background: rgba(59, 130, 246, 0.3);
-  }
-
-  .btn-label {
-    font-size: 0.875rem;
   }
 
   /* Mobile responsive */
   @media (max-width: 768px) {
-    .control-bar {
+    .curated-section {
       top: 10px;
-      right: 10px;
-      padding: 0.375rem;
+      left: 10px;
+      padding: 0.5rem;
       gap: 0.375rem;
     }
 
-    .control-btn {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.875rem;
+    .section-label {
+      font-size: 0.625rem;
     }
 
-    .btn-label {
-      display: none;
+    .curated-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
     }
   }
 </style>

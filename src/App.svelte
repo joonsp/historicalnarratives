@@ -9,11 +9,12 @@
   import NarrativeLibrary from './lib/components/NarrativeLibrary.svelte';
   import NarrativePrompt from './lib/components/NarrativePrompt.svelte';
   import ControlBar from './lib/components/ControlBar.svelte';
+  import CuratedSection from './lib/components/CuratedSection.svelte';
   import { isNarrativeMode } from './lib/stores/narrative';
   import type { HHEpisode } from './lib/data/hardcoreHistory';
 
   let mapComponent: Map;
-  let episodesOpen = true;
+  let episodesOpen = false;
   let narrativesOpen = false;
   let bordersOpen = false;
 
@@ -32,32 +33,36 @@
 
   function toggleEpisodes() {
     episodesOpen = !episodesOpen;
-    if (episodesOpen) {
-      narrativesOpen = false;
-    }
   }
 
   function toggleNarratives() {
     narrativesOpen = !narrativesOpen;
     if (narrativesOpen) {
-      episodesOpen = false;
+      bordersOpen = false;
     }
   }
 
   function toggleBorders() {
     bordersOpen = !bordersOpen;
+    if (bordersOpen) {
+      narrativesOpen = false;
+    }
   }
 </script>
 
 <main>
   <Map bind:this={mapComponent} />
 
-  <!-- Control Bar -->
-  <ControlBar
+  <!-- Curated Section (top-left) -->
+  <CuratedSection
     {episodesOpen}
+    on:openEpisodes={toggleEpisodes}
+  />
+
+  <!-- Control Bar (top-right) -->
+  <ControlBar
     {narrativesOpen}
     {bordersOpen}
-    on:openEpisodes={toggleEpisodes}
     on:openNarratives={toggleNarratives}
     on:openBorders={toggleBorders}
   />
@@ -82,10 +87,10 @@
     on:opacityChange={handleOpacityChange}
   />
 
-  <div class="title-overlay glass">
-    <h1>🗺️ Historical Narrative</h1>
-    <p>{$isNarrativeMode ? 'Narrative Journey' : 'Explore history through time or create AI-generated journeys'}</p>
-  </div>
+  <!-- AI Narrative Generation Input -->
+  {#if !$isNarrativeMode}
+    <NarrativePrompt />
+  {/if}
 
   <!-- Credits footer -->
   <div class="credits-footer">
@@ -109,34 +114,6 @@
     height: 100vh;
     position: relative;
     overflow: hidden;
-  }
-
-  .title-overlay {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    border-radius: 12px;
-    text-align: center;
-    z-index: 999;
-    pointer-events: none;
-  }
-
-  .title-overlay h1 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .title-overlay p {
-    margin: 4px 0 0;
-    font-size: 12px;
-    opacity: 0.6;
   }
 
   .credits-footer {
