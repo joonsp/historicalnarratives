@@ -12,6 +12,9 @@
     toggleBorders: void;
     opacityChange: number;
     flyTo: { lat: number; lng: number; zoom: number };
+    closeNarratives: void;
+    closeBorders: void;
+    closePlaces: void;
   }>();
 
   export let narrativesOpen = false;
@@ -58,26 +61,28 @@
         📍 <span class="btn-label">Places</span>
       </button>
     </div>
-
-    {#if narrativesOpen || bordersOpen || placesOpen}
-      <div class="panel-container">
-        {#if narrativesOpen}
-          <NarrativeLibrary isOpen={narrativesOpen} />
-        {/if}
-        {#if bordersOpen}
-          <BorderControls
-            isOpen={bordersOpen}
-            on:toggleBorders={handleToggleBorders}
-            on:opacityChange={handleOpacityChange}
-          />
-        {/if}
-        {#if placesOpen}
-          <PlacesPanel isOpen={placesOpen} on:flyTo />
-        {/if}
-      </div>
-    {/if}
   {/if}
 </div>
+
+<!-- Panels rendered outside .glass to avoid backdrop-filter containing block on mobile -->
+{#if !$isNarrativeMode && (narrativesOpen || bordersOpen || placesOpen)}
+  <div class="panel-area">
+    {#if narrativesOpen}
+      <NarrativeLibrary isOpen={narrativesOpen} on:close={() => dispatch('closeNarratives')} />
+    {/if}
+    {#if bordersOpen}
+      <BorderControls
+        isOpen={bordersOpen}
+        on:toggleBorders={handleToggleBorders}
+        on:opacityChange={handleOpacityChange}
+        on:close={() => dispatch('closeBorders')}
+      />
+    {/if}
+    {#if placesOpen}
+      <PlacesPanel isOpen={placesOpen} on:flyTo on:close={() => dispatch('closePlaces')} />
+    {/if}
+  </div>
+{/if}
 
 <style>
   .control-bar {
@@ -109,8 +114,11 @@
     justify-content: flex-end;
   }
 
-  .panel-container {
-    margin-top: 0.5rem;
+  .panel-area {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1099;
   }
 
   @keyframes slideIn {
@@ -173,10 +181,20 @@
     .control-btn {
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
+      min-width: 44px;
+      min-height: 44px;
+      justify-content: center;
     }
 
     .btn-label {
       display: none;
+    }
+
+    .panel-area {
+      top: 100px;
+      left: 10px;
+      right: 10px;
+      bottom: 0;
     }
   }
 </style>

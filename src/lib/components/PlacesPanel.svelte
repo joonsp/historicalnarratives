@@ -7,6 +7,7 @@
 
   const dispatch = createEventDispatcher<{
     flyTo: { lat: number; lng: number; zoom: number };
+    close: void;
   }>();
 
   export let isOpen = false;
@@ -97,6 +98,7 @@
   <div class="places-panel glass">
     <div class="panel-header">
       <h2>Places</h2>
+      <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
     </div>
 
     <!-- Mode toggle -->
@@ -199,7 +201,7 @@
 <style>
   .places-panel {
     width: 420px;
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 200px);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -224,12 +226,36 @@
 
   .panel-header {
     margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .panel-header h2 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
     color: #f1f5f9;
   }
 
@@ -494,8 +520,15 @@
   @media (max-width: 768px) {
     .places-panel {
       width: 100%;
-      max-height: calc(100vh - 150px);
+      height: 100%;
+      max-height: 100%;
       margin-left: 0;
+      border-radius: 12px;
+    }
+
+    .close-btn {
+      min-width: 44px;
+      min-height: 44px;
     }
   }
 </style>

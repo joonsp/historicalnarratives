@@ -151,4 +151,13 @@
     font-size: 11px;
     opacity: 0.6;
   }
+
+  @media (max-width: 768px) {
+    .event-info {
+      left: 10px;
+      top: auto;
+      bottom: 140px;
+      width: calc(100% - 20px);
+    }
+  }
 </style>

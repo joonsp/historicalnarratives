@@ -72,6 +72,7 @@
   <CuratedSection
     {episodesOpen}
     on:openEpisodes={toggleEpisodes}
+    on:closeEpisodes={() => episodesOpen = false}
     on:episodeSelect={handleEpisodeSelect}
   />
 
@@ -83,6 +84,9 @@
     on:openNarratives={toggleNarratives}
     on:openBorders={toggleBorders}
     on:openPlaces={togglePlaces}
+    on:closeNarratives={() => narrativesOpen = false}
+    on:closeBorders={() => bordersOpen = false}
+    on:closePlaces={() => placesOpen = false}
     on:toggleBorders={handleToggleBorders}
     on:opacityChange={handleOpacityChange}
     on:flyTo={e => mapComponent?.flyTo(e.detail.lat, e.detail.lng, e.detail.zoom)}
@@ -96,7 +100,7 @@
   {:else}
     <!-- Free Explore Mode -->
     <EventInfo {episodesOpen} />
-    <TimeSlider hideOnMobile={episodesOpen || narrativesOpen || bordersOpen || placesOpen} />
+    <TimeSlider />
   {/if}
 
   <!-- Credits footer -->
@@ -152,5 +156,11 @@
 
   .credits-footer span {
     color: #64748b;
+  }
+
+  @media (max-width: 768px) {
+    .credits-footer {
+      display: none;
+    }
   }
 </style>

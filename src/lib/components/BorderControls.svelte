@@ -4,6 +4,7 @@
   const dispatch = createEventDispatcher<{
     toggleBorders: void;
     opacityChange: number;
+    close: void;
   }>();
 
   export let isOpen = false;
@@ -27,6 +28,7 @@
   <div class="control-header">
     <span class="control-icon">🗺️</span>
     <span class="control-title">Historical Borders</span>
+    <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
   </div>
 
   <div class="control-row">
@@ -91,6 +93,28 @@
     margin-bottom: 12px;
     padding-bottom: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
   }
 
   .control-icon {
@@ -203,9 +227,15 @@
       min-width: unset;
       padding: 12px;
       width: 100%;
-      max-height: calc(100vh - 150px);
+      max-height: 100%;
       overflow-y: auto;
       margin-left: 0;
+      border-radius: 12px;
+    }
+
+    .close-btn {
+      min-width: 44px;
+      min-height: 44px;
     }
   }
 </style>

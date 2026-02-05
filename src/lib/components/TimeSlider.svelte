@@ -5,8 +5,6 @@
   import NarrativePrompt from './NarrativePrompt.svelte';
   import { isNarrativeMode } from '../stores/narrative';
 
-  export let hideOnMobile = false;
-
   let intervalId: number | null = null;
   let currentState = { year: 1800, isPlaying: false, playSpeed: 10, minYear: -1000, maxYear: 2026 };
 
@@ -107,7 +105,7 @@
   }
 </script>
 
-<div class="timeline-wrapper" class:hide-on-mobile={hideOnMobile}>
+<div class="timeline-wrapper">
   <!-- AI Narrative Generation Input -->
   {#if !$isNarrativeMode}
     <NarrativePrompt />
@@ -344,10 +342,6 @@
       margin-bottom: 20px;
     }
 
-    .timeline-wrapper.hide-on-mobile {
-      display: none;
-    }
-
     .timeline-container {
       padding: 8px 12px;
       min-width: unset;
@@ -413,8 +407,13 @@
     }
 
     .slider::-webkit-slider-thumb {
-      width: 16px;
-      height: 16px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .control-btn, .play-btn {
+      min-width: 44px;
+      min-height: 44px;
     }
 
     .keyboard-hints {

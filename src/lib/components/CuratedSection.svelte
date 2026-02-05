@@ -6,6 +6,7 @@
   const dispatch = createEventDispatcher<{
     openEpisodes: void;
     episodeSelect: HHEpisode;
+    closeEpisodes: void;
   }>();
 
   export let episodesOpen = false;
@@ -25,13 +26,14 @@
   >
     🎙️ HH Episodes
   </button>
-
-  {#if episodesOpen}
-    <div class="panel-container">
-      <EpisodePanel isOpen={episodesOpen} on:episodeSelect={handleEpisodeSelect} />
-    </div>
-  {/if}
 </div>
+
+<!-- Panel rendered outside .glass to avoid backdrop-filter containing block on mobile -->
+{#if episodesOpen}
+  <div class="panel-area-left">
+    <EpisodePanel isOpen={episodesOpen} on:episodeSelect={handleEpisodeSelect} on:close={() => dispatch('closeEpisodes')} />
+  </div>
+{/if}
 
 <style>
   .curated-section {
@@ -100,8 +102,11 @@
     background: rgba(59, 130, 246, 0.3);
   }
 
-  .panel-container {
-    margin-top: 0.5rem;
+  .panel-area-left {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    z-index: 1099;
   }
 
   /* Mobile responsive */
@@ -120,6 +125,15 @@
     .curated-btn {
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
+      min-width: 44px;
+      min-height: 44px;
+    }
+
+    .panel-area-left {
+      top: 100px;
+      left: 10px;
+      right: 10px;
+      bottom: 0;
     }
   }
 </style>

@@ -9,7 +9,7 @@
   } from '../data/hardcoreHistory';
   import { createEventDispatcher } from 'svelte';
 
-  const dispatch = createEventDispatcher<{ episodeSelect: HHEpisode }>();
+  const dispatch = createEventDispatcher<{ episodeSelect: HHEpisode; close: void }>();
 
   export let isOpen = true;
   let searchQuery = '';
@@ -88,7 +88,10 @@
 {#if isOpen}
   <div class="panel glass">
     <div class="panel-header">
-      <h2>🎙️ Hardcore History</h2>
+      <div class="header-row">
+        <h2>🎙️ Hardcore History</h2>
+        <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
+      </div>
 
       {#if showRelatedEpisode}
         <div class="related-episode-section">
@@ -205,7 +208,7 @@
 <style>
   .panel {
     width: 320px;
-    max-height: calc(100vh - 300px);
+    max-height: calc(100vh - 200px);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
@@ -230,8 +233,15 @@
   @media (max-width: 768px) {
     .panel {
       width: 100%;
-      max-height: calc(100vh - 150px);
+      height: 100%;
+      max-height: 100%;
       margin-right: 0;
+      border-radius: 12px;
+    }
+
+    .close-btn {
+      min-width: 44px;
+      min-height: 44px;
     }
   }
 
@@ -240,10 +250,37 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .panel-header h2 {
     margin: 0 0 12px;
     font-size: 18px;
     font-weight: 600;
+  }
+
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
   }
 
   .mode-selector {
