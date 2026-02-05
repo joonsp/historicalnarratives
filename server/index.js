@@ -6,6 +6,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { validateUrl, extractContent } from '../api/lib/contentExtractor.js';
 
 dotenv.config();
 
@@ -63,21 +64,43 @@ app.post('/api/generate-narrative', async (req, res) => {
     });
   }
 
-  const { query, theme, startYear, endYear, stepCount } = req.body;
+  const { query, theme, startYear, endYear, stepCount, sourceContent, sourceTitle, sourceUrl, sourceType } = req.body;
 
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
+  if (!query && !sourceContent) {
+    return res.status(400).json({ error: 'query or sourceContent is required' });
   }
 
   try {
     // Build the prompt
-    let prompt = `Create a historical narrative timeline for: ${query}\n\n`;
-    if (theme) prompt += `Theme: ${theme}\n`;
-    if (startYear !== undefined && endYear !== undefined) {
-      prompt += `Time period: ${startYear} to ${endYear}\n`;
+    let prompt;
+    let systemPrompt = NARRATIVE_SYSTEM_PROMPT;
+    let maxTokens = 4096;
+
+    if (sourceContent) {
+      // Source-content mode: extract historical events from provided content
+      systemPrompt += `\n\nWhen given SOURCE CONTENT from a URL, extract all historical events, locations, and dates mentioned.
+- Map each significant event to its geographic location with precise coordinates
+- Order events chronologically
+- Preserve the source's narrative thread and educational value
+- If the content is not primarily historical, find the strongest historical angles`;
+
+      prompt = '';
+      if (sourceTitle) prompt += `Source: "${sourceTitle}"\n`;
+      if (sourceUrl) prompt += `URL: ${sourceUrl}\n`;
+      if (sourceType) prompt += `Content type: ${sourceType}\n`;
+      prompt += `\n--- BEGIN SOURCE CONTENT ---\n${sourceContent}\n--- END SOURCE CONTENT ---\n\n`;
+      if (query) prompt += `Focus/learning question: ${query}\n\n`;
+      prompt += 'Extract historical events from the source content above and return ONLY the JSON object, no additional text.';
+      maxTokens = 8192;
+    } else {
+      prompt = `Create a historical narrative timeline for: ${query}\n\n`;
+      if (theme) prompt += `Theme: ${theme}\n`;
+      if (startYear !== undefined && endYear !== undefined) {
+        prompt += `Time period: ${startYear} to ${endYear}\n`;
+      }
+      if (stepCount) prompt += `Number of steps: approximately ${stepCount}\n`;
+      prompt += '\nReturn ONLY the JSON object, no additional text.';
     }
-    if (stepCount) prompt += `Number of steps: approximately ${stepCount}\n`;
-    prompt += '\nReturn ONLY the JSON object, no additional text.';
 
     // Call Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -89,8 +112,8 @@ app.post('/api/generate-narrative', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 4096,
-        system: NARRATIVE_SYSTEM_PROMPT,
+        max_tokens: maxTokens,
+        system: systemPrompt,
         messages: [
           {
             role: 'user',
@@ -138,6 +161,26 @@ app.post('/api/embeddings', async (req, res) => {
     error: 'Embeddings endpoint not implemented',
     message: 'Anthropic does not provide embeddings. Narratives will persist without semantic search capability.'
   });
+});
+
+// URL scraping endpoint
+app.post('/api/scrape-url', async (req, res) => {
+  const { url } = req.body;
+
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'url is required' });
+  }
+
+  try {
+    validateUrl(url);
+    const result = await extractContent(url);
+    res.json(result);
+  } catch (error) {
+    console.error('Scrape error:', error);
+    res.status(422).json({
+      error: error.message || 'Failed to extract content from URL',
+    });
+  }
 });
 
 // Health check endpoint

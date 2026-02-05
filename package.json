@@ -12,9 +12,12 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
-    "express": "^4.22.1"
+    "express": "^4.22.1",
+    "linkedom": "^0.18.12",
+    "youtube-transcript-plus": "^1.1.2"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",

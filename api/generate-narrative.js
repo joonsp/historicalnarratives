@@ -28,22 +28,13 @@ export default async function handler(req, res) {
     });
   }
 
-  const { query, theme, startYear, endYear, stepCount } = req.body;
+  const { query, theme, startYear, endYear, stepCount, sourceContent, sourceTitle, sourceUrl, sourceType } = req.body;
 
-  if (!query) {
-    return res.status(400).json({ error: 'query is required' });
+  if (!query && !sourceContent) {
+    return res.status(400).json({ error: 'query or sourceContent is required' });
   }
 
-  // Build the prompt
-  let userPrompt = `Create a historical narrative timeline for: ${query}\n\n`;
-  if (theme) userPrompt += `Theme: ${theme}\n`;
-  if (startYear !== undefined && endYear !== undefined) {
-    userPrompt += `Time period: ${startYear} to ${endYear}\n`;
-  }
-  if (stepCount) userPrompt += `Number of steps: approximately ${stepCount}\n`;
-  userPrompt += '\nReturn ONLY the JSON object, no additional text.';
-
-  const systemPrompt = `You are a historical timeline generator for an interactive map application.
+  let systemPrompt = `You are a historical timeline generator for an interactive map application.
 
 When given a query about a historical event, period, or narrative, generate a structured JSON timeline with:
 1. 5-15 chronological steps (events/locations)
@@ -79,6 +70,34 @@ Output ONLY valid JSON matching this schema:
   "regions": ["Greece", "Persia"]
 }`;
 
+  let userPrompt;
+  let maxTokens = 4096;
+
+  if (sourceContent) {
+    systemPrompt += `\n\nWhen given SOURCE CONTENT from a URL, extract all historical events, locations, and dates mentioned.
+- Map each significant event to its geographic location with precise coordinates
+- Order events chronologically
+- Preserve the source's narrative thread and educational value
+- If the content is not primarily historical, find the strongest historical angles`;
+
+    userPrompt = '';
+    if (sourceTitle) userPrompt += `Source: "${sourceTitle}"\n`;
+    if (sourceUrl) userPrompt += `URL: ${sourceUrl}\n`;
+    if (sourceType) userPrompt += `Content type: ${sourceType}\n`;
+    userPrompt += `\n--- BEGIN SOURCE CONTENT ---\n${sourceContent}\n--- END SOURCE CONTENT ---\n\n`;
+    if (query) userPrompt += `Focus/learning question: ${query}\n\n`;
+    userPrompt += 'Extract historical events from the source content above and return ONLY the JSON object, no additional text.';
+    maxTokens = 8192;
+  } else {
+    userPrompt = `Create a historical narrative timeline for: ${query}\n\n`;
+    if (theme) userPrompt += `Theme: ${theme}\n`;
+    if (startYear !== undefined && endYear !== undefined) {
+      userPrompt += `Time period: ${startYear} to ${endYear}\n`;
+    }
+    if (stepCount) userPrompt += `Number of steps: approximately ${stepCount}\n`;
+    userPrompt += '\nReturn ONLY the JSON object, no additional text.';
+  }
+
   try {
     // Call Anthropic API
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -90,7 +109,7 @@ Output ONLY valid JSON matching this schema:
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
+        max_tokens: maxTokens,
         system: systemPrompt,
         messages: [
           {

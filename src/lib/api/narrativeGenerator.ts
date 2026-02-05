@@ -20,6 +20,14 @@ interface GenerationRequest {
   stepCount?: number;
 }
 
+interface ContentGenerationRequest {
+  sourceContent: string;
+  sourceTitle: string;
+  sourceUrl: string;
+  sourceType: string;
+  focusQuery?: string;
+}
+
 /**
  * System prompt for Claude AI
  */
@@ -240,6 +248,57 @@ export async function generateNarrative(request: GenerationRequest): Promise<Nar
   cacheNarrative(request.query, narrative);
 
   // Step 6: Register in the global store
+  registerNarrative(narrative);
+
+  return narrative;
+}
+
+/**
+ * Generate a narrative timeline from pre-scraped URL content.
+ */
+export async function generateNarrativeFromContent(request: ContentGenerationRequest): Promise<NarrativeTimeline> {
+  // Check cache by url|focusQuery key
+  const cacheKey = `${request.sourceUrl}|${request.focusQuery || ''}`;
+  const exactCached = getCachedNarrative(cacheKey);
+  if (exactCached) {
+    console.log('Using cached narrative for URL:', request.sourceUrl);
+    registerNarrative(exactCached);
+    return exactCached;
+  }
+
+  console.log('Generating narrative from URL content:', request.sourceTitle);
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL ||
+    (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
+
+  const response = await fetch(`${backendUrl}/api/generate-narrative`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: request.focusQuery || undefined,
+      sourceContent: request.sourceContent,
+      sourceTitle: request.sourceTitle,
+      sourceUrl: request.sourceUrl,
+      sourceType: request.sourceType,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || `Request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.narrative) {
+    throw new Error('Invalid response from server');
+  }
+
+  const narrative = parseNarrativeResponse(data.narrative);
+
+  // Save to persistent storage
+  saveNarrative(cacheKey, [], narrative);
+  cacheNarrative(cacheKey, narrative);
   registerNarrative(narrative);
 
   return narrative;

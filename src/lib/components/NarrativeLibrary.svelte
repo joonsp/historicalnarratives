@@ -2,19 +2,30 @@
   import { onMount } from 'svelte';
   import { narrative, isNarrativeMode } from '../stores/narrative';
   import { sampleNarratives } from '../data/sampleNarratives';
-  import { generateNarrative, isAIGenerationAvailable } from '../api/narrativeGenerator';
+  import { generateNarrative, generateNarrativeFromContent, isAIGenerationAvailable } from '../api/narrativeGenerator';
+  import { scrapeUrl } from '../api/urlScraper';
+  import type { ScrapedContent } from '../api/urlScraper';
   import { getAllNarratives, getNarrativesVersion } from '../data/narrativeTimelines';
 
   export let isOpen = false;
   let searchQuery = '';
   let selectedTheme = 'all';
-  let activeTab: 'browse' | 'create' = 'browse';
+  let activeTab: 'browse' | 'create' | 'from-url' = 'browse';
 
   // AI generation state
   let aiQuery = '';
   let isGenerating = false;
   let error = '';
   let aiAvailable = isAIGenerationAvailable();
+
+  // From URL state
+  let urlInput = '';
+  let focusQuery = '';
+  let scrapedContent: ScrapedContent | null = null;
+  let isScraping = false;
+  let isGeneratingFromUrl = false;
+  let scrapeError = '';
+  let urlStep: 'input' | 'preview' = 'input';
 
   // Track narratives version for reactivity
   let narrativesVersion = 0;
@@ -106,6 +117,67 @@
     }
   }
 
+  async function handleScrape() {
+    if (!urlInput.trim()) return;
+
+    isScraping = true;
+    scrapeError = '';
+    scrapedContent = null;
+
+    try {
+      scrapedContent = await scrapeUrl(urlInput.trim());
+      urlStep = 'preview';
+    } catch (e) {
+      scrapeError = e instanceof Error ? e.message : 'Failed to extract content from URL';
+    } finally {
+      isScraping = false;
+    }
+  }
+
+  async function handleGenerateFromUrl() {
+    if (!scrapedContent) return;
+
+    isGeneratingFromUrl = true;
+    scrapeError = '';
+
+    try {
+      const generated = await generateNarrativeFromContent({
+        sourceContent: scrapedContent.content,
+        sourceTitle: scrapedContent.title,
+        sourceUrl: scrapedContent.sourceUrl,
+        sourceType: scrapedContent.sourceType,
+        focusQuery: focusQuery.trim() || undefined,
+      });
+      narrative.loadNarrative(generated.id);
+
+      // Reset state
+      urlInput = '';
+      focusQuery = '';
+      scrapedContent = null;
+      urlStep = 'input';
+      activeTab = 'browse';
+      narrativesVersion = getNarrativesVersion();
+    } catch (e) {
+      scrapeError = e instanceof Error ? e.message : 'Failed to generate narrative';
+      console.error('Narrative from URL error:', e);
+    } finally {
+      isGeneratingFromUrl = false;
+    }
+  }
+
+  function resetUrlFlow() {
+    urlStep = 'input';
+    scrapedContent = null;
+    scrapeError = '';
+    focusQuery = '';
+  }
+
+  function formatWordCount(text: string): string {
+    const words = text.split(/\s+/).filter(Boolean).length;
+    if (words > 1000) return `${(words / 1000).toFixed(1)}k words`;
+    return `${words} words`;
+  }
+
   function useExample(example: string) {
     aiQuery = example;
   }
@@ -130,6 +202,13 @@
           on:click={() => activeTab = 'create'}
         >
           ✨ Create
+        </button>
+        <button
+          class="tab-btn"
+          class:active={activeTab === 'from-url'}
+          on:click={() => activeTab = 'from-url'}
+        >
+          From URL
         </button>
       </div>
     </div>
@@ -200,7 +279,7 @@
         {/each}
       {/if}
     </div>
-    {:else}
+    {:else if activeTab === 'create'}
       <!-- Create tab: AI generation -->
       <div class="create-panel">
         <h3>🤖 AI Historical Journeys</h3>
@@ -258,6 +337,84 @@
               </button>
             {/each}
           </div>
+        {/if}
+      </div>
+    {:else if activeTab === 'from-url'}
+      <!-- From URL tab -->
+      <div class="create-panel">
+        {#if urlStep === 'input'}
+          <h3>Generate from URL</h3>
+          <p class="url-hint">Supports YouTube, articles, Wikipedia, podcast RSS feeds</p>
+
+          <form on:submit|preventDefault={handleScrape}>
+            <input
+              type="url"
+              placeholder="Paste a URL..."
+              bind:value={urlInput}
+              disabled={isScraping}
+              class="prompt-input"
+            />
+
+            <button type="submit" disabled={isScraping || !urlInput.trim()} class="generate-btn">
+              {#if isScraping}
+                <span class="spinner"></span>
+                Extracting...
+              {:else}
+                Extract Content
+              {/if}
+            </button>
+          </form>
+
+          {#if scrapeError}
+            <p class="error">{scrapeError}</p>
+          {/if}
+
+        {:else if urlStep === 'preview' && scrapedContent}
+          <div class="preview-card">
+            <span class="source-badge source-{scrapedContent.sourceType}">
+              {scrapedContent.sourceType === 'youtube' ? 'YouTube' : scrapedContent.sourceType === 'podcast' ? 'Podcast' : 'Article'}
+            </span>
+
+            <h3 class="preview-title">{scrapedContent.title}</h3>
+
+            {#if scrapedContent.metadata.author || scrapedContent.metadata.siteName}
+              <p class="preview-meta">
+                {scrapedContent.metadata.author || ''}{scrapedContent.metadata.author && scrapedContent.metadata.siteName ? ' · ' : ''}{scrapedContent.metadata.siteName || ''}
+              </p>
+            {/if}
+
+            <p class="preview-excerpt">
+              {scrapedContent.content.slice(0, 300)}{scrapedContent.content.length > 300 ? '...' : ''}
+            </p>
+            <p class="preview-stats">{formatWordCount(scrapedContent.content)}</p>
+          </div>
+
+          <form on:submit|preventDefault={handleGenerateFromUrl}>
+            <input
+              type="text"
+              placeholder="What do you want to learn? (optional)"
+              bind:value={focusQuery}
+              disabled={isGeneratingFromUrl}
+              class="prompt-input"
+            />
+
+            <button type="submit" disabled={isGeneratingFromUrl} class="generate-btn">
+              {#if isGeneratingFromUrl}
+                <span class="spinner"></span>
+                Generating...
+              {:else}
+                Generate Narrative
+              {/if}
+            </button>
+          </form>
+
+          {#if scrapeError}
+            <p class="error">{scrapeError}</p>
+          {/if}
+
+          <button class="back-link" on:click={resetUrlFlow}>
+            Try Different URL
+          </button>
         {/if}
       </div>
     {/if}
@@ -679,6 +836,95 @@
   .example-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+  }
+
+  /* From URL tab */
+  .url-hint {
+    margin: 0 0 1rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  .preview-card {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .source-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .source-youtube {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .source-article {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .source-podcast {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+
+  .preview-title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .preview-meta {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    color: #94a3b8;
+  }
+
+  .preview-excerpt {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: #94a3b8;
+  }
+
+  .preview-stats {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  .back-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
+    margin-top: 0.75rem;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: #f1f5f9;
   }
 
   /* Mobile responsive */
