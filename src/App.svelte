@@ -13,6 +13,7 @@
   let episodesOpen = false;
   let narrativesOpen = false;
   let bordersOpen = false;
+  let placesOpen = false;
 
   function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
     const episode = event.detail;
@@ -32,6 +33,7 @@
     if (episodesOpen) {
       narrativesOpen = false;
       bordersOpen = false;
+      placesOpen = false;
     }
   }
 
@@ -40,6 +42,7 @@
     if (narrativesOpen) {
       episodesOpen = false;
       bordersOpen = false;
+      placesOpen = false;
     }
   }
 
@@ -48,6 +51,16 @@
     if (bordersOpen) {
       episodesOpen = false;
       narrativesOpen = false;
+      placesOpen = false;
+    }
+  }
+
+  function togglePlaces() {
+    placesOpen = !placesOpen;
+    if (placesOpen) {
+      episodesOpen = false;
+      narrativesOpen = false;
+      bordersOpen = false;
     }
   }
 </script>
@@ -66,10 +79,13 @@
   <ControlBar
     {narrativesOpen}
     {bordersOpen}
+    {placesOpen}
     on:openNarratives={toggleNarratives}
     on:openBorders={toggleBorders}
+    on:openPlaces={togglePlaces}
     on:toggleBorders={handleToggleBorders}
     on:opacityChange={handleOpacityChange}
+    on:flyTo={e => mapComponent?.flyTo(e.detail.lat, e.detail.lng, e.detail.zoom)}
   />
 
   <!-- Conditionally show narrative UI or regular UI -->
@@ -80,7 +96,7 @@
   {:else}
     <!-- Free Explore Mode -->
     <EventInfo {episodesOpen} />
-    <TimeSlider hideOnMobile={episodesOpen || narrativesOpen || bordersOpen} />
+    <TimeSlider hideOnMobile={episodesOpen || narrativesOpen || bordersOpen || placesOpen} />
   {/if}
 
   <!-- Credits footer -->

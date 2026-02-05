@@ -40,7 +40,7 @@
     left: 20px;
     padding: 0.75rem;
     border-radius: 12px;
-    z-index: 1000;
+    z-index: 1100;
     animation: slideIn 0.3s ease-out;
     display: flex;
     flex-direction: column;

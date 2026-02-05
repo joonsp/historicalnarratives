@@ -3,16 +3,20 @@
   import { createEventDispatcher } from 'svelte';
   import NarrativeLibrary from './NarrativeLibrary.svelte';
   import BorderControls from './BorderControls.svelte';
+  import PlacesPanel from './PlacesPanel.svelte';
 
   const dispatch = createEventDispatcher<{
     openNarratives: void;
     openBorders: void;
+    openPlaces: void;
     toggleBorders: void;
     opacityChange: number;
+    flyTo: { lat: number; lng: number; zoom: number };
   }>();
 
   export let narrativesOpen = false;
   export let bordersOpen = false;
+  export let placesOpen = false;
 
   function handleToggleBorders() {
     dispatch('toggleBorders');
@@ -44,9 +48,18 @@
       >
         📚 <span class="btn-label">Narratives</span>
       </button>
+
+      <button
+        class="control-btn"
+        class:active={placesOpen}
+        on:click={() => dispatch('openPlaces')}
+        title="Explore Places"
+      >
+        📍 <span class="btn-label">Places</span>
+      </button>
     </div>
 
-    {#if narrativesOpen || bordersOpen}
+    {#if narrativesOpen || bordersOpen || placesOpen}
       <div class="panel-container">
         {#if narrativesOpen}
           <NarrativeLibrary isOpen={narrativesOpen} />
@@ -57,6 +70,9 @@
             on:toggleBorders={handleToggleBorders}
             on:opacityChange={handleOpacityChange}
           />
+        {/if}
+        {#if placesOpen}
+          <PlacesPanel isOpen={placesOpen} on:flyTo />
         {/if}
       </div>
     {/if}
@@ -73,7 +89,7 @@
     gap: 0.5rem;
     padding: 0.75rem;
     border-radius: 12px;
-    z-index: 1000;
+    z-index: 1100;
     animation: slideIn 0.3s ease-out;
   }
 
