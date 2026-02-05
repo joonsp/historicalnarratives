@@ -104,7 +104,7 @@
 
   .panel-area-left {
     position: fixed;
-    top: 80px;
+    top: 130px;
     left: 20px;
     z-index: 1100;
   }
