@@ -106,7 +106,7 @@
     position: fixed;
     top: 80px;
     left: 20px;
-    z-index: 1099;
+    z-index: 1100;
   }
 
   /* Mobile responsive */

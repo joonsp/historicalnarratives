@@ -118,7 +118,7 @@
     position: fixed;
     top: 80px;
     right: 20px;
-    z-index: 1099;
+    z-index: 1100;
   }
 
   @keyframes slideIn {
