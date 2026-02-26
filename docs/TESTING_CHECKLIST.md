@@ -180,6 +180,5 @@ Save to a file or create a GitHub issue with these details.
 ## Additional Resources
 
 - **Full Implementation Summary**: See IMPLEMENTATION_SUMMARY.md
-- **Data Mapping**: See DATA_MAPPING.md
 - **Color Mappings**: See color-mappings.json
 - **Validation Scripts**: See scripts/validate-geojson.cjs

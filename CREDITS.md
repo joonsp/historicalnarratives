@@ -6,7 +6,7 @@
 **Source:** [aourednik/historical-basemaps](https://github.com/aourednik/historical-basemaps)
 **License:** GPL-3.0
 **Description:** GeoJSON datasets of historical country borders spanning 1000 BCE to 2000 CE. Provides 12 time period snapshots used for the map overlays.
-**Credit:** Aourednik, M. (2019). Historical Basemaps. GitHub repository.
+**Credit:** Ourednik, A. (2018). Historical Basemaps. GitHub repository.
 
 ### Map Tiles
 **Provider:** [CartoDB](https://carto.com/)

@@ -79,7 +79,7 @@ historymap/
 │   ├── add-metadata.cjs       ✅ Color/metadata injection
 │   └── validate-geojson.cjs   ✅ Quality assurance
 ├── color-mappings.json        ✅ 1,191 entity→color mappings
-└── DATA_MAPPING.md            ✅ Documentation
+└── color-mappings.json        ✅ Entity→color mappings
 ```
 
 ## Code Changes
@@ -270,8 +270,7 @@ git checkout HEAD -- public/data/borders/
 - **Node.js scripts**: Custom metadata enhancement and validation
 
 ### Documentation
-- **DATA_MAPPING.md**: Year mappings and file paths
-- **color-mappings.json**: Complete entity→color mapping
+- **color-mappings.json**: Complete entity→color mapping (year mappings and file paths)
 - **IMPLEMENTATION_SUMMARY.md**: This document
 
 ## Changelog
