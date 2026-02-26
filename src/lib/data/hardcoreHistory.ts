@@ -1,4 +1,7 @@
 // Hardcore History episode metadata
+// Episode titles and numbers are factual metadata. Descriptions are original
+// summaries, not copied from dancarlin.com. URLs link to the official site.
+// This project is not affiliated with or endorsed by Dan Carlin.
 export interface HHEpisode {
   id: string;
   number: number;

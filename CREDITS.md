@@ -56,7 +56,7 @@ This project was inspired by:
 This project is open source. Individual components retain their original licenses:
 - Historical basemaps data: GPL-3.0
 - CartoDB tiles: CC BY 3.0
-- Application code: [Your chosen license]
+- Application code: GPL-3.0
 
 ## Contributing
 
