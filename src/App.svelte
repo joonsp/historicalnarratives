@@ -6,14 +6,45 @@
   import StepCard from './lib/components/StepCard.svelte';
   import ControlBar from './lib/components/ControlBar.svelte';
   import CuratedSection from './lib/components/CuratedSection.svelte';
-  import { isNarrativeMode } from './lib/stores/narrative';
+  import AreaNarrativeDialog from './lib/components/AreaNarrativeDialog.svelte';
+  import { isNarrativeMode, narrative } from './lib/stores/narrative';
+  import { detectArea, type DetectedArea } from './lib/utils/areaDetection';
   import type { HHEpisode } from './lib/data/hardcoreHistory';
+  import type L from 'leaflet';
 
   let mapComponent: Map;
   let episodesOpen = false;
   let narrativesOpen = false;
   let bordersOpen = false;
   let placesOpen = false;
+
+  // Area narrative dialog state
+  let areaDialogArea: DetectedArea | null = null;
+  let areaDialogPosition = { x: 0, y: 0 };
+
+  async function handleMapClick(event: CustomEvent<{ latlng: L.LatLng; containerPoint: L.Point }>) {
+    const { latlng, containerPoint } = event.detail;
+
+    // Close open panels
+    episodesOpen = false;
+    narrativesOpen = false;
+    bordersOpen = false;
+    placesOpen = false;
+
+    areaDialogPosition = { x: containerPoint.x, y: containerPoint.y };
+
+    try {
+      const layers = mapComponent?.getBorderLayers() || [];
+      areaDialogArea = await detectArea(latlng, layers);
+    } catch {
+      areaDialogArea = null;
+    }
+  }
+
+  function handleNarrativeLoaded(event: CustomEvent<{ id: string }>) {
+    narrative.loadNarrative(event.detail.id);
+    areaDialogArea = null;
+  }
 
   function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
     const episode = event.detail;
@@ -66,7 +97,7 @@
 </script>
 
 <main>
-  <Map bind:this={mapComponent} />
+  <Map bind:this={mapComponent} on:mapClick={handleMapClick} />
 
   <!-- Curated Section (top-left) -->
   <CuratedSection
@@ -101,6 +132,16 @@
     <!-- Free Explore Mode -->
     <EventInfo {episodesOpen} />
     <TimeSlider />
+  {/if}
+
+  <!-- Area Narrative Dialog -->
+  {#if areaDialogArea && !$isNarrativeMode}
+    <AreaNarrativeDialog
+      area={areaDialogArea}
+      screenPosition={areaDialogPosition}
+      on:close={() => areaDialogArea = null}
+      on:narrativeLoaded={handleNarrativeLoaded}
+    />
   {/if}
 
   <!-- Credits footer -->

@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import L from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import { timeline } from '../stores/timeline';
   import { narrative, currentStep, isNarrativeMode } from '../stores/narrative';
+
+  const dispatch = createEventDispatcher<{
+    mapClick: { latlng: L.LatLng; containerPoint: L.Point };
+  }>();
   import {
     historicalEvents,
     getEventsForYear,
@@ -323,6 +327,10 @@
     });
   }
 
+  export function getBorderLayers(): L.GeoJSON[] {
+    return borderLayers;
+  }
+
   function getStyleOptions(feature?: any): L.PathOptions {
     if (!feature || !feature.properties) {
       return {
@@ -456,6 +464,12 @@
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
+
+    // Map click → area narrative dialog (skip in narrative mode)
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      if ($isNarrativeMode) return;
+      dispatch('mapClick', { latlng: e.latlng, containerPoint: e.containerPoint });
+    });
 
     // Subscribe to timeline changes (only in free explore mode)
     const unsubscribeTimeline = timeline.subscribe(state => {
