@@ -21,9 +21,11 @@
   // Area narrative dialog state
   let areaDialogArea: DetectedArea | null = null;
   let areaDialogPosition = { x: 0, y: 0 };
+  let clickSeq = 0;
 
   async function handleMapClick(event: CustomEvent<{ latlng: L.LatLng; containerPoint: L.Point }>) {
     const { latlng, containerPoint } = event.detail;
+    const seq = ++clickSeq;
 
     // Close open panels
     episodesOpen = false;
@@ -35,9 +37,11 @@
 
     try {
       const layers = mapComponent?.getBorderLayers() || [];
-      areaDialogArea = await detectArea(latlng, layers);
+      const result = await detectArea(latlng, layers);
+      if (seq !== clickSeq) return; // stale click, discard
+      areaDialogArea = result;
     } catch {
-      areaDialogArea = null;
+      if (seq === clickSeq) areaDialogArea = null;
     }
   }
 

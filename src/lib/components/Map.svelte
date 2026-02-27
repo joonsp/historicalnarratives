@@ -4,10 +4,6 @@
   import 'leaflet/dist/leaflet.css';
   import { timeline } from '../stores/timeline';
   import { narrative, currentStep, isNarrativeMode } from '../stores/narrative';
-
-  const dispatch = createEventDispatcher<{
-    mapClick: { latlng: L.LatLng; containerPoint: L.Point };
-  }>();
   import {
     historicalEvents,
     getEventsForYear,
@@ -18,6 +14,10 @@
   import type { HistoricalEvent, BorderCollection, BorderFeature } from '../data/borders';
   import type { NarrativeStep } from '../data/narrativeTimelines';
   import { getNarrativeById } from '../data/narrativeTimelines';
+
+  const dispatch = createEventDispatcher<{
+    mapClick: { latlng: L.LatLng; containerPoint: L.Point };
+  }>();
 
   let mapContainer: HTMLDivElement;
   let map: L.Map;
@@ -380,6 +380,11 @@
 
       layer.on('mouseout', function(this: L.Path) {
         this.setStyle(getStyleOptions(feature));
+      });
+
+      // Forward clicks to map so area dialog works on border polygons
+      layer.on('click', function(e: L.LeafletMouseEvent) {
+        map?.fire('click', e);
       });
     }
   }
