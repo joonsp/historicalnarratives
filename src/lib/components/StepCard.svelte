@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { narrative, currentStep } from '../stores/narrative';
+  import { narrative, currentNarrative } from '../stores/narrative';
+  import type { NarrativeStep } from '../data/narrativeTimelines';
 
   function formatYear(year: number): string {
     if (year < 0) {
@@ -18,86 +19,88 @@
     siege: '🏰',
     crossing: '🌊',
   };
+
+  const STACK_SIZE = 4;
+
+  $: totalRemaining = Math.max(
+    0,
+    ($currentNarrative?.steps.length ?? 0) - $narrative.currentStepIndex - 1
+  );
+
+  $: upcomingSteps = ($currentNarrative?.steps ?? []).slice(
+    $narrative.currentStepIndex + 1,
+    $narrative.currentStepIndex + 1 + STACK_SIZE
+  ) as NarrativeStep[];
+
+  // Deterministic per-step seed so each card's wobble/rotation stays stable.
+  function seeded(seq: number, salt: number): number {
+    const x = Math.sin(seq * 12.9898 + salt * 78.233) * 43758.5453;
+    return (x - Math.floor(x)) * 2 - 1; // -1..1
+  }
 </script>
 
-{#if $narrative.showStepCard && $currentStep}
-  <div class="step-card glass">
-    <!-- Header -->
-    <div class="step-header">
-      <span class="step-number">#{$currentStep.sequenceNumber}</span>
-      <span class="step-year">{formatYear($currentStep.year)}</span>
-      <span class="event-type">
-        {eventTypeEmojis[$currentStep.eventType] || '📍'}
+{#if $narrative.showStepCard && totalRemaining > 0}
+  <div class="queue-stack">
+    <div class="queue-header">
+      <span class="queue-label">
+        <span class="queue-icon">🃏</span>
+        Up next · {totalRemaining}
       </span>
+      <button
+        class="close-btn"
+        on:click={() => narrative.toggleStepCard()}
+        aria-label="Hide queue"
+        title="Hide queue"
+      >✕</button>
     </div>
 
-    <!-- Title -->
-    <h3 class="step-title">{$currentStep.title}</h3>
-
-    <!-- Description -->
-    <p class="step-description">{$currentStep.description}</p>
-
-    <!-- Media -->
-    {#if $currentStep.media?.imageUrl}
-      <div class="step-media">
-        <img
-          src={$currentStep.media.imageUrl}
-          alt={$currentStep.media.caption || $currentStep.title}
-          loading="lazy"
-        />
-        {#if $currentStep.media.caption}
-          <p class="media-caption">{$currentStep.media.caption}</p>
-        {/if}
-      </div>
-    {/if}
-
-    <!-- Links -->
-    {#if $currentStep.links && $currentStep.links.length > 0}
-      <div class="step-links">
-        {#each $currentStep.links as link}
-          <a
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="step-link"
-          >
-            {link.title} →
-          </a>
-        {/each}
-      </div>
-    {/if}
-
-    <!-- Toggle button -->
-    <button
-      class="toggle-btn"
-      on:click={() => narrative.toggleStepCard()}
-      aria-label="Hide step card"
-    >
-      ✕
-    </button>
+    <div class="stack-area">
+      {#each upcomingSteps as peek, i (peek.sequenceNumber)}
+        <button
+          type="button"
+          class="peek-card glass"
+          class:up-next={i === 0}
+          style:--tx="{seeded(peek.sequenceNumber, 1) * 10}px"
+          style:--ty="{i * 22}px"
+          style:--rot="{seeded(peek.sequenceNumber, 2) * 6}deg"
+          style:--op={1 - i * 0.1}
+          style:z-index={STACK_SIZE + 5 - i}
+          on:click={() => narrative.jumpToStep($narrative.currentStepIndex + i + 1)}
+          title="Jump to #{peek.sequenceNumber} · {peek.title}"
+        >
+          <div class="peek-header">
+            <span class="peek-number">#{peek.sequenceNumber}</span>
+            <span class="peek-year">{formatYear(peek.year)}</span>
+            <span class="peek-type">{eventTypeEmojis[peek.eventType] || '📍'}</span>
+          </div>
+          <div class="peek-title">{peek.title}</div>
+        </button>
+      {/each}
+    </div>
   </div>
-{:else if !$narrative.showStepCard && $currentStep}
-  <!-- Show button when card is hidden -->
+{:else if !$narrative.showStepCard && totalRemaining > 0}
   <button
-    class="show-card-btn glass"
+    class="show-queue-btn glass"
     on:click={() => narrative.toggleStepCard()}
-    aria-label="Show step card"
+    aria-label="Show queue"
   >
-    📖 Show Details
+    🃏 Queue · {totalRemaining}
   </button>
 {/if}
 
 <style>
-  .step-card {
+  .queue-stack {
     position: fixed;
     top: 80px;
     right: 20px;
-    width: 380px;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    padding: 1.5rem;
+    width: 300px;
     z-index: 900;
     animation: slideIn 0.3s ease-out;
+    pointer-events: none;
+  }
+
+  .queue-stack > * {
+    pointer-events: auto;
   }
 
   @keyframes slideIn {
@@ -111,177 +114,188 @@
     }
   }
 
-  .step-header {
+  .queue-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 0.25rem;
   }
 
-  .step-number {
+  .queue-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(226, 232, 240, 0.85);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  }
+
+  .queue-icon {
+    font-size: 1rem;
+  }
+
+  .close-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    color: #cbd5e1;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+
+  .close-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #fca5a5;
+    transform: scale(1.08);
+  }
+
+  .stack-area {
+    position: relative;
+    display: grid;
+    grid-template-areas: "stack";
+    /* Generous bottom padding so the deepest offset card doesn't get clipped visually. */
+    padding-bottom: 100px;
+  }
+
+  .stack-area > .peek-card {
+    grid-area: stack;
+  }
+
+  .peek-card {
+    width: 100%;
+    padding: 0.875rem 1.125rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    transform-origin: 50% 40%;
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
+    opacity: var(--op);
+    transition:
+      transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2),
+      opacity 0.35s ease,
+      filter 0.25s ease,
+      border-color 0.25s ease,
+      background 0.25s ease;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+    will-change: transform, opacity;
+    font-family: inherit;
+  }
+
+  .peek-card.up-next {
+    border-color: rgba(96, 165, 250, 0.45);
+    background: rgba(30, 41, 59, 0.85);
+    box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.18);
+  }
+
+  .peek-card:hover {
+    transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.95)) rotate(calc(var(--rot) * 0.25)) scale(1.04);
+    opacity: 1;
+    z-index: 50;
+    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.55));
+    border-color: rgba(96, 165, 250, 0.55);
+  }
+
+  .peek-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .peek-number {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    border-radius: 50%;
+    min-width: 30px;
+    height: 22px;
+    padding: 0 0.5rem;
+    background: rgba(59, 130, 246, 0.35);
+    color: #dbeafe;
+    border-radius: 999px;
     font-weight: 700;
-    font-size: 0.9375rem;
+    font-size: 0.75rem;
   }
 
-  .step-year {
-    font-size: 0.875rem;
+  .peek-card.up-next .peek-number {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  }
+
+  .peek-year {
+    font-size: 0.75rem;
     color: #94a3b8;
     font-weight: 500;
   }
 
-  .event-type {
-    font-size: 1.25rem;
+  .peek-type {
     margin-left: auto;
+    font-size: 1rem;
   }
 
-  .step-title {
-    margin: 0 0 1rem;
-    font-size: 1.375rem;
-    font-weight: 700;
-    color: #f1f5f9;
-    line-height: 1.3;
-  }
-
-  .step-description {
-    margin: 0 0 1.25rem;
+  .peek-title {
     font-size: 0.9375rem;
-    line-height: 1.6;
-    color: #cbd5e1;
-  }
-
-  .step-media {
-    margin-bottom: 1.25rem;
-  }
-
-  .step-media img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  .media-caption {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: #94a3b8;
-    font-style: italic;
-  }
-
-  .step-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .step-link {
-    color: #60a5fa;
-    text-decoration: none;
-    font-size: 0.9375rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    transition: all 0.2s;
-    padding: 0.375rem 0;
-  }
-
-  .step-link:hover {
-    color: #3b82f6;
-    transform: translateX(2px);
-  }
-
-  .toggle-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 28px;
-    height: 28px;
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 50%;
-    color: #ef4444;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    font-size: 14px;
     font-weight: 600;
+    color: #e2e8f0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .toggle-btn:hover {
-    background: rgba(239, 68, 68, 0.25);
-    transform: scale(1.1);
-  }
-
-  .show-card-btn {
+  .show-queue-btn {
     position: fixed;
     top: 80px;
     right: 20px;
-    padding: 0.75rem 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    background: rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.85);
+    color: #93c5fd;
     cursor: pointer;
-    font-weight: 500;
-    font-size: 0.9375rem;
+    font-weight: 600;
+    font-size: 0.875rem;
     transition: all 0.2s;
     z-index: 900;
   }
 
-  .show-card-btn:hover {
-    background: rgba(59, 130, 246, 0.3);
-    transform: scale(1.05);
+  .show-queue-btn:hover {
+    background: rgba(59, 130, 246, 0.25);
+    transform: translateY(-1px);
+    border-color: rgba(96, 165, 250, 0.5);
   }
 
-  /* Custom scrollbar */
-  .step-card::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .step-card::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-  }
-
-  .step-card::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-  }
-
-  .step-card::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  /* Mobile responsive */
   @media (max-width: 768px) {
-    .step-card {
+    .queue-stack {
       right: 10px;
-      width: calc(100% - 20px);
-      max-width: 380px;
       top: 70px;
-      max-height: calc(100vh - 180px);
+      width: 260px;
     }
 
-    .show-card-btn {
+    .show-queue-btn {
       top: 70px;
       right: 10px;
     }
 
-    .step-title {
-      font-size: 1.25rem;
+    .close-btn {
+      min-width: 36px;
+      min-height: 36px;
     }
   }
 </style>
