@@ -276,6 +276,8 @@ body {
     radial-gradient(circle at 2px 3px, rgba(43, 29, 16, 0.35) 1px, transparent 1.4px);
   background-size: 3px 3px, 5px 5px;
   background-position: 0 0, 1px 2px;
+  -webkit-mask-image: radial-gradient(circle 140px at var(--mx, -300px) var(--my, -300px), transparent 0, transparent 60px, black 140px);
+  mask-image: radial-gradient(circle 140px at var(--mx, -300px) var(--my, -300px), transparent 0, transparent 60px, black 140px);
 }
 .scanlines {
   pointer-events: none;

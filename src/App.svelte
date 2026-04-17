@@ -30,8 +30,24 @@
     resolvingTimer = setTimeout(() => { resolving = false; }, 900);
   }
 
+  let mouseFrame = 0;
+  function handleMouseMove(e: MouseEvent) {
+    if (mouseFrame) return;
+    const { clientX, clientY } = e;
+    mouseFrame = requestAnimationFrame(() => {
+      document.documentElement.style.setProperty('--mx', `${clientX}px`);
+      document.documentElement.style.setProperty('--my', `${clientY}px`);
+      mouseFrame = 0;
+    });
+  }
+
   onMount(() => {
     fireReveal();
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseFrame) cancelAnimationFrame(mouseFrame);
+    };
   });
 
   let areaDialogArea: DetectedArea | null = null;
