@@ -433,10 +433,27 @@
 
     // Parchment-tinted tile layer (CartoDB Voyager, no labels) — see app.css for the sepia filter
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0)',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0) | Coastlines: <a href="https://www.naturalearthdata.com/">Natural Earth</a>',
       subdomains: 'abcd',
       maxZoom: 19
     }).addTo(map);
+
+    const svgRenderer = L.svg({ padding: 0.1 });
+    fetch('/data/coastlines/ne_50m_coastline.geojson')
+      .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+      .then((coastGeo) => {
+        if (!map) return;
+        L.geoJSON(coastGeo, {
+          style: {
+            stroke: true,
+            fill: false,
+            renderer: svgRenderer,
+            interactive: false,
+            className: 'coast-base',
+          },
+        }).addTo(map);
+      })
+      .catch((err) => console.warn('coastline layer failed to load', err));
 
     // Map click → area narrative dialog (skip in narrative mode)
     map.on('click', (e: L.LeafletMouseEvent) => {

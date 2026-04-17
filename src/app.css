@@ -264,6 +264,11 @@ body {
   display: none;
 }
 
+.leaflet-overlay-pane .coast-base {
+  stroke: var(--ink); stroke-width: 0.8px; fill: none; opacity: 0.55;
+  pointer-events: none;
+}
+
 .dither-layer {
   pointer-events: none;
   position: fixed;
