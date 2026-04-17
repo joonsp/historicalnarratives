@@ -204,7 +204,6 @@
 
   .timeline-container {
     padding: 16px 24px;
-    border-radius: 16px;
     min-width: 600px;
     max-width: 90vw;
   }
@@ -217,49 +216,55 @@
   }
 
   .year-display {
-    min-width: 120px;
+    min-width: 140px;
   }
 
   .year {
-    font-size: 24px;
-    font-weight: bold;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: var(--font-pixel);
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    color: var(--rubric);
   }
 
   .controls {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
 
   .control-btn, .play-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 8px 12px;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    padding: 6px 10px;
+    color: var(--ink);
+    font-family: var(--font-mono);
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 16px;
+    transition: none;
+    font-size: 14px;
+    line-height: 1;
   }
 
-  .control-btn:hover, .play-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
+  .control-btn:hover, .play-btn:hover,
+  .control-btn:focus-visible, .play-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .play-btn {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border: none;
+    padding: 6px 16px;
+    background: var(--rubric);
+    color: var(--parchment);
+    box-shadow: 2px 2px 0 var(--ink);
   }
 
   .speed-control {
     display: flex;
     align-items: center;
-    font-size: 12px;
-    opacity: 0.7;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
     min-width: 80px;
     text-align: right;
   }
@@ -268,18 +273,16 @@
     text-align: center;
     margin-bottom: 16px;
     padding: 8px 16px;
-    background: rgba(59, 130, 246, 0.15);
-    border-radius: 8px;
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: var(--parchment-2);
+    border: 2px solid var(--ink);
   }
 
   .timeslot-display span {
-    font-size: 16px;
-    font-weight: 600;
-    background: linear-gradient(135deg, #60a5fa, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
   .timeline-body {
@@ -295,9 +298,12 @@
   }
 
   .slider-label {
-    font-size: 12px;
-    opacity: 0.7;
-    min-width: 60px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    min-width: 70px;
   }
 
   .slider {
@@ -305,33 +311,38 @@
     height: 6px;
     -webkit-appearance: none;
     appearance: none;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+    background: var(--parchment-3);
+    border: 1px solid var(--ink);
     cursor: pointer;
   }
 
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    background: var(--rubric);
+    border: 2px solid var(--ink);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
-    transition: transform 0.2s;
   }
 
-  .slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+  .slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--rubric);
+    border: 2px solid var(--ink);
+    cursor: pointer;
   }
 
   .keyboard-hints {
     display: flex;
     justify-content: center;
     gap: 20px;
+    font-family: var(--font-mono);
     font-size: 10px;
-    opacity: 0.5;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
   }
 
   /* Mobile responsive */

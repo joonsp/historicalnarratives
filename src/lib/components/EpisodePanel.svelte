@@ -207,26 +207,13 @@
 
 <style>
   .panel {
-    width: 320px;
+    width: 340px;
     max-height: calc(100vh - 200px);
-    border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: slideIn 0.3s ease-out;
     overflow-y: auto;
     margin-right: 10px;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateY(-10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
   }
 
   /* Mobile responsive */
@@ -236,7 +223,6 @@
       height: 100%;
       max-height: 100%;
       margin-right: 0;
-      border-radius: 12px;
     }
 
     .close-btn {
@@ -247,7 +233,7 @@
 
   .panel-header {
     padding: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid var(--ink);
   }
 
   .header-row {
@@ -258,8 +244,11 @@
 
   .panel-header h2 {
     margin: 0 0 12px;
-    font-size: 18px;
-    font-weight: 600;
+    font-family: var(--font-pixel);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
   .close-btn {
@@ -268,24 +257,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    color: #94a3b8;
-    font-size: 1rem;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     flex-shrink: 0;
   }
 
-  .close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f1f5f9;
+  .close-btn:hover,
+  .close-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .mode-selector {
     display: flex;
-    gap: 0.375rem;
+    gap: 6px;
     margin-bottom: 12px;
     flex-wrap: wrap;
   }
@@ -293,48 +284,51 @@
   .mode-btn {
     flex: 1;
     min-width: fit-content;
-    padding: 0.5rem 0.625rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    color: #cbd5e1;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    padding: 7px 8px;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     white-space: nowrap;
   }
 
-  .mode-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.25);
+  .mode-btn:hover,
+  .mode-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .mode-btn.active {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.4);
-    color: #60a5fa;
+    background: var(--ink);
+    color: var(--parchment);
   }
 
   .search-input {
     width: 100%;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: inherit;
-    font-size: 14px;
+    background: var(--parchment-2);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
     outline: none;
-    transition: all 0.2s;
+    transition: none;
   }
 
   .search-input:focus {
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--rubric);
+    background: var(--parchment);
   }
 
   .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--ink-faded);
   }
 
   .episodes-list {
@@ -353,72 +347,90 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: var(--parchment-2);
+    border: 1px solid var(--ink);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     margin-bottom: 8px;
   }
 
-  .series-header:hover {
-    background: rgba(255, 255, 255, 0.1);
+  .series-header:hover,
+  .series-header:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .series-icon {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.5);
-    transition: transform 0.2s;
+    color: var(--rubric);
   }
 
   .series-title {
-    font-size: 12px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.1em;
+    color: var(--ink);
     margin: 0;
     flex: 1;
     text-align: left;
-    font-weight: 600;
+  }
+
+  .series-header:hover .series-title,
+  .series-header:focus-visible .series-title,
+  .series-header:hover .series-icon,
+  .series-header:focus-visible .series-icon,
+  .series-header:hover .series-count,
+  .series-header:focus-visible .series-count {
+    color: var(--parchment);
   }
 
   .series-count {
-    font-size: 11px;
-    padding: 2px 8px;
-    background: rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-pixel);
+    font-size: 9px;
+    padding: 2px 6px;
+    background: var(--rubric);
+    color: var(--parchment);
+    border: 1px solid var(--ink);
   }
 
   .series-episodes {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-left: 8px;
+    gap: 0;
+    padding-left: 4px;
   }
 
   .episode-card {
     width: 100%;
     text-align: left;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: inherit;
+    padding: 12px 10px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px dotted var(--ink-faded);
+    color: var(--ink);
     cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 8px;
+    transition: none;
+    margin-bottom: 0;
     display: block;
   }
 
-  .episode-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(4px);
+  .episode-card:hover,
+  .episode-card:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
+  }
+  .episode-card:hover *,
+  .episode-card:focus-visible * {
+    color: var(--parchment) !important;
+    border-color: var(--parchment) !important;
   }
 
   .episode-card.active {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
-    border-color: rgba(59, 130, 246, 0.4);
+    background: var(--parchment-2);
+    border-left: 3px solid var(--rubric);
   }
 
   .episode-header {
@@ -429,32 +441,44 @@
   }
 
   .episode-number {
-    font-size: 11px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
     padding: 2px 6px;
-    background: rgba(59, 130, 246, 0.3);
-    border-radius: 4px;
+    background: var(--rubric);
+    color: var(--parchment);
+    border: 1px solid var(--ink);
+    letter-spacing: 0.05em;
   }
 
   .episode-title {
-    font-weight: 600;
-    font-size: 14px;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--ink);
+    line-height: 1.3;
   }
 
   .episode-meta {
     display: flex;
     gap: 12px;
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
     margin-bottom: 6px;
   }
 
   .episode-desc {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-2);
     margin: 0 0 8px;
     line-height: 1.4;
     display: -webkit-box;
@@ -464,20 +488,25 @@
   }
 
   .episode-link {
-    font-size: 12px;
-    color: #60a5fa;
-    text-decoration: none;
-    transition: color 0.2s;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rubric);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: none;
   }
 
   .episode-link:hover {
-    color: #93c5fd;
+    color: var(--ink);
   }
 
   .separator {
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: var(--ink);
     margin: 12px 0;
+    opacity: 0.5;
   }
 
   .related-episode-section {
@@ -494,24 +523,22 @@
   }
 
   .related-icon {
-    font-size: 14px;
+    font-size: 12px;
+    color: var(--rubric);
   }
 
   .related-title {
-    font-size: 11px;
+    font-family: var(--font-pixel);
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.6);
-    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--rubric);
   }
 
   .episode-card.related {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .episode-card.related:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25));
-    border-color: rgba(59, 130, 246, 0.5);
+    background: var(--parchment-2);
+    border: 2px solid var(--rubric);
+    border-bottom: 2px solid var(--rubric);
+    box-shadow: 2px 2px 0 var(--ink);
   }
 </style>

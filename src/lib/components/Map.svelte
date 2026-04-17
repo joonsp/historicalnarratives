@@ -36,39 +36,23 @@
   let bordersEnabled = true; // Enabled by default
   let borderOpacity = 0.25;
 
-  // Event type icons/colors
-  const eventColors: Record<string, string> = {
-    battle: '#ef4444',
-    treaty: '#22c55e', 
-    revolution: '#f97316',
-    founding: '#3b82f6',
-    collapse: '#8b5cf6',
+  // Event type glyphs — short monospace symbols that render crisply at small sizes
+  const eventGlyphs: Record<string, string> = {
+    battle: '+',
+    treaty: '§',
+    revolution: '*',
+    founding: '■',
+    collapse: 'x',
   };
 
   function createEventIcon(event: HistoricalEvent): L.DivIcon {
-    const color = eventColors[event.type] || '#ffffff';
+    const type = event.type || 'battle';
+    const glyph = eventGlyphs[type] || '•';
     return L.divIcon({
       className: 'custom-event-marker',
-      html: `
-        <div style="
-          width: 24px;
-          height: 24px;
-          background: ${color};
-          border: 2px solid white;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          cursor: pointer;
-          transition: transform 0.2s;
-        " class="event-dot">
-          ${event.type === 'battle' ? '⚔️' : event.type === 'treaty' ? '📜' : event.type === 'revolution' ? '🔥' : event.type === 'founding' ? '🏛️' : '💀'}
-        </div>
-      `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      html: `<div class="seal-marker seal-${type}"><span>${glyph}</span></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
     });
   }
 
@@ -88,11 +72,11 @@
       const yearStr = event.year < 0 ? `${Math.abs(event.year)} BCE` : `${event.year} CE`;
       
       marker.bindPopup(`
-        <div style="min-width: 200px;">
-          <h3 style="margin: 0 0 8px; font-weight: bold; color: #1e293b;">${event.name}</h3>
-          <p style="margin: 0 0 8px; color: #64748b; font-size: 12px;">${yearStr}</p>
-          <p style="margin: 0 0 12px; color: #334155;">${event.description}</p>
-          ${event.wikipediaUrl ? `<a href="${event.wikipediaUrl}" target="_blank" style="color: #3b82f6; text-decoration: none;">Learn more →</a>` : ''}
+        <div style="min-width: 200px; color: var(--ink);">
+          <h3 style="margin: 0 0 8px; font-family: var(--font-pixel); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink);">${event.name}</h3>
+          <p style="margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded);">${yearStr}</p>
+          <p style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${event.description}</p>
+          ${event.wikipediaUrl ? `<a href="${event.wikipediaUrl}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rubric); text-decoration: underline;">Learn more →</a>` : ''}
         </div>
       `);
 
@@ -114,31 +98,11 @@
    */
   function createNarrativeStepMarker(step: NarrativeStep, isCurrent: boolean = false): L.DivIcon {
     const size = isCurrent ? 48 : 36;
-    const pulseClass = isCurrent ? 'narrative-pulse' : '';
+    const activeClass = isCurrent ? 'step-seal--active' : '';
 
     return L.divIcon({
       className: 'narrative-step-marker',
-      html: `
-        <div class="step-marker ${pulseClass}" style="
-          width: ${size}px;
-          height: ${size}px;
-          background: ${isCurrent ? '#3b82f6' : '#60a5fa'};
-          border: ${isCurrent ? '4px' : '3px'} solid white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: 700;
-          font-size: ${isCurrent ? '18px' : '14px'};
-          box-shadow: 0 4px 12px rgba(59, 130, 246, ${isCurrent ? '0.6' : '0.4'});
-          position: relative;
-          transition: all 0.3s ease;
-        ">
-          ${step.sequenceNumber}
-          ${isCurrent ? '<div class="pulse"></div>' : ''}
-        </div>
-      `,
+      html: `<div class="step-seal ${activeClass}">${step.sequenceNumber}</div>`,
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
     });
@@ -187,31 +151,35 @@
     const yearStr = step.year < 0 ? `${Math.abs(step.year)} BCE` : `${step.year} CE`;
 
     marker.bindPopup(`
-      <div style="min-width: 250px; max-width: 350px;">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-          <h3 style="margin: 0; font-weight: bold; color: #1e293b;">${step.title}</h3>
+      <div style="min-width: 250px; max-width: 350px; color: var(--ink);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; gap: 8px;">
+          <h3 style="margin: 0; font-family: var(--font-pixel); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); line-height: 1.3;">${step.title}</h3>
           <span style="
-            background: #3b82f6;
-            color: white;
+            background: var(--rubric);
+            color: var(--parchment);
             padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
+            border: 1px solid var(--ink);
+            font-family: var(--font-pixel);
+            font-size: 10px;
+            letter-spacing: 0.05em;
             white-space: nowrap;
-            margin-left: 8px;
           ">#${step.sequenceNumber}</span>
         </div>
-        <p style="margin: 0 0 8px; color: #64748b; font-size: 12px;">${yearStr}</p>
-        <p style="margin: 0 0 12px; color: #334155; line-height: 1.5;">${step.description}</p>
+        <p style="margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded);">${yearStr}</p>
+        <p style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${step.description}</p>
         ${step.links && step.links.length > 0 ? `
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
+          <div style="border-top: 1px dotted var(--ink-faded); padding-top: 12px;">
             ${step.links.map(link => `
               <a href="${link.url}" target="_blank" style="
-                color: #3b82f6;
-                text-decoration: none;
+                font-family: var(--font-mono);
+                font-size: 11px;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--rubric);
+                text-decoration: underline;
+                text-underline-offset: 2px;
                 display: block;
                 margin-top: 4px;
-                font-size: 13px;
               ">${link.title} →</a>
             `).join('')}
           </div>
@@ -245,10 +213,10 @@
     const coordinates = steps.map(s => s.location as [number, number]);
 
     narrativePath = L.polyline(coordinates, {
-      color: '#60a5fa',
-      weight: 3,
-      opacity: 0.6,
-      dashArray: '10, 10',
+      color: '#2b1d10',
+      weight: 2,
+      opacity: 0.75,
+      dashArray: '3, 6',
       className: 'narrative-path'
     }).addTo(map);
 
@@ -264,8 +232,8 @@
         const yearStr = step.year < 0 ? `${Math.abs(step.year)} BCE` : `${step.year} CE`;
 
         marker.bindTooltip(`
-          <strong>#${step.sequenceNumber}: ${step.title}</strong><br>
-          <span style="font-size: 11px; opacity: 0.8;">${yearStr}</span>
+          <strong style="font-family: var(--font-pixel); font-size: 10px; letter-spacing: 0.06em;">#${step.sequenceNumber}: ${step.title}</strong><br>
+          <span style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8;">${yearStr}</span>
         `, {
           direction: 'top',
           offset: [0, -20]
@@ -463,8 +431,8 @@
     // Add zoom control to bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Dark tile layer
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Parchment-tinted tile layer (CartoDB Voyager, no labels) — see app.css for the sepia filter
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0)',
       subdomains: 'abcd',
       maxZoom: 19
@@ -556,38 +524,16 @@
     z-index: 0;
   }
 
-  :global(.leaflet-popup-content-wrapper) {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  /* Leaflet popup + tooltip + marker styles are defined globally in app.css.
+     Only component-scoped overrides below. */
+
+  :global(.custom-event-marker) {
+    background: transparent !important;
+    border: none !important;
   }
 
-  :global(.leaflet-popup-tip) {
-    background: rgba(255, 255, 255, 0.95);
-  }
-
-  :global(.event-dot:hover) {
-    transform: scale(1.2);
-  }
-
-  :global(.custom-border-tooltip) {
-    background: rgba(30, 41, 59, 0.95) !important;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 8px 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    color: #f1f5f9;
-    font-size: 13px;
-  }
-
-  :global(.custom-border-tooltip .leaflet-tooltip-left::before) {
-    border-left-color: rgba(30, 41, 59, 0.95);
-  }
-
-  :global(.custom-border-tooltip .leaflet-tooltip-right::before) {
-    border-right-color: rgba(30, 41, 59, 0.95);
+  :global(.custom-event-marker .seal-marker:hover) {
+    transform: scale(1.15);
   }
 
   /* Narrative mode styles */
@@ -596,47 +542,17 @@
     border: none !important;
   }
 
-  :global(.step-marker) {
-    position: relative;
-    cursor: pointer;
-  }
-
-  :global(.step-marker:hover) {
+  :global(.narrative-step-marker .step-seal:hover) {
     transform: scale(1.1);
   }
 
-  :global(.narrative-pulse .pulse) {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: #3b82f6;
-    opacity: 0;
-    animation: pulse 2s ease-out infinite;
-    pointer-events: none;
-    top: 0;
-    left: 0;
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: scale(1);
-      opacity: 0.5;
-    }
-    100% {
-      transform: scale(2.5);
-      opacity: 0;
-    }
-  }
-
   :global(.narrative-path) {
-    stroke-dasharray: 10, 10;
-    animation: dash 1s linear infinite;
+    animation: dash 1.5s linear infinite;
   }
 
   @keyframes dash {
     to {
-      stroke-dashoffset: -20;
+      stroke-dashoffset: -18;
     }
   }
 </style>

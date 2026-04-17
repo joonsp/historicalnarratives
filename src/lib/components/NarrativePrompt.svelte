@@ -72,57 +72,48 @@
   .narrative-prompt {
     width: auto;
     max-width: 600px;
-    padding: 0.5rem;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateY(10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+    padding: 8px;
   }
 
   .warning-compact {
-    padding: 0.5rem 0.75rem;
-    background: rgba(234, 179, 8, 0.1);
-    border: 1px solid rgba(234, 179, 8, 0.3);
-    border-radius: 6px;
-    color: #fbbf24;
-    font-size: 0.75rem;
+    padding: 6px 10px;
+    background: var(--parchment-2);
+    border: 1px solid var(--rubric);
+    color: var(--rubric);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
 
   form {
     display: flex;
-    gap: 0.5rem;
+    gap: 6px;
     align-items: center;
   }
 
   .prompt-input {
     flex: 1;
     min-width: 300px;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #f1f5f9;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    padding: 7px 12px;
+    border: 2px solid var(--ink);
+    background: var(--parchment-2);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    transition: none;
   }
 
   .prompt-input:focus {
     outline: none;
-    border-color: #a78bfa;
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--rubric);
+    background: var(--parchment);
   }
 
   .prompt-input::placeholder {
-    color: #64748b;
+    color: var(--ink-faded);
   }
 
   .prompt-input:disabled {
@@ -131,55 +122,41 @@
   }
 
   .generate-btn {
-    padding: 0.5rem 0.75rem;
-    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
+    padding: 7px 12px;
+    background: var(--rubric);
+    border: 2px solid var(--ink);
+    color: var(--parchment);
+    font-family: var(--font-pixel);
+    font-size: 11px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 40px;
   }
 
-  .generate-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  .generate-btn:hover:not(:disabled),
+  .generate-btn:focus-visible:not(:disabled) {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .generate-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-  }
-
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 
   .error-compact {
-    padding: 0.5rem;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 6px;
-    color: #ef4444;
-    font-size: 0.75rem;
-    margin-top: 0.5rem;
+    padding: 6px 10px;
+    background: var(--parchment-2);
+    border: 1px solid var(--rubric);
+    color: var(--rubric);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 8px;
   }
 
   /* Mobile responsive */
@@ -190,11 +167,11 @@
 
     .prompt-input {
       min-width: 200px;
-      font-size: 0.8125rem;
+      font-size: 12px;
     }
 
     .generate-btn {
-      font-size: 0.875rem;
+      font-size: 10px;
       min-width: 36px;
     }
   }

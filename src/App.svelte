@@ -11,6 +11,7 @@
   import { detectArea, type DetectedArea } from './lib/utils/areaDetection';
   import type { HHEpisode } from './lib/data/hardcoreHistory';
   import type L from 'leaflet';
+  import { onMount } from 'svelte';
 
   let mapComponent: Map;
   let episodesOpen = false;
@@ -18,7 +19,21 @@
   let bordersOpen = false;
   let placesOpen = false;
 
-  // Area narrative dialog state
+  let tick = 0;
+  let resolving = false;
+  let resolvingTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function fireReveal() {
+    tick += 1;
+    resolving = true;
+    if (resolvingTimer) clearTimeout(resolvingTimer);
+    resolvingTimer = setTimeout(() => { resolving = false; }, 900);
+  }
+
+  onMount(() => {
+    fireReveal();
+  });
+
   let areaDialogArea: DetectedArea | null = null;
   let areaDialogPosition = { x: 0, y: 0 };
   let clickSeq = 0;
@@ -48,6 +63,7 @@
   function handleNarrativeLoaded(event: CustomEvent<{ id: string }>) {
     narrative.loadNarrative(event.detail.id);
     areaDialogArea = null;
+    fireReveal();
   }
 
   function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
@@ -69,6 +85,7 @@
       narrativesOpen = false;
       bordersOpen = false;
       placesOpen = false;
+      fireReveal();
     }
   }
 
@@ -78,6 +95,7 @@
       episodesOpen = false;
       bordersOpen = false;
       placesOpen = false;
+      fireReveal();
     }
   }
 
@@ -87,6 +105,7 @@
       episodesOpen = false;
       narrativesOpen = false;
       placesOpen = false;
+      fireReveal();
     }
   }
 
@@ -96,6 +115,7 @@
       episodesOpen = false;
       narrativesOpen = false;
       bordersOpen = false;
+      fireReveal();
     }
   }
 </script>
@@ -103,42 +123,48 @@
 <main>
   <Map bind:this={mapComponent} on:mapClick={handleMapClick} />
 
-  <!-- Curated Section (top-left) -->
-  <CuratedSection
-    {episodesOpen}
-    on:openEpisodes={toggleEpisodes}
-    on:closeEpisodes={() => episodesOpen = false}
-    on:episodeSelect={handleEpisodeSelect}
-  />
+  <div class="scriptorium-topbar">
+    <span class="topbar-left">&#x2756; Historia Narrativa</span>
+    <span class="topbar-center">&mdash; SCRIPTORIUM EDITION &mdash;</span>
+    <span class="topbar-right">MMXXVI &middot; Folio I</span>
+  </div>
 
-  <!-- Control Bar (top-right) -->
-  <ControlBar
-    {narrativesOpen}
-    {bordersOpen}
-    {placesOpen}
-    on:openNarratives={toggleNarratives}
-    on:openBorders={toggleBorders}
-    on:openPlaces={togglePlaces}
-    on:closeNarratives={() => narrativesOpen = false}
-    on:closeBorders={() => bordersOpen = false}
-    on:closePlaces={() => placesOpen = false}
-    on:toggleBorders={handleToggleBorders}
-    on:opacityChange={handleOpacityChange}
-    on:flyTo={e => mapComponent?.flyTo(e.detail.lat, e.detail.lng, e.detail.zoom)}
-  />
+  {#key tick}
+    <CuratedSection
+      {episodesOpen}
+      on:openEpisodes={toggleEpisodes}
+      on:closeEpisodes={() => episodesOpen = false}
+      on:episodeSelect={handleEpisodeSelect}
+    />
+  {/key}
 
-  <!-- Conditionally show narrative UI or regular UI -->
+  {#key tick}
+    <ControlBar
+      {narrativesOpen}
+      {bordersOpen}
+      {placesOpen}
+      on:openNarratives={toggleNarratives}
+      on:openBorders={toggleBorders}
+      on:openPlaces={togglePlaces}
+      on:closeNarratives={() => narrativesOpen = false}
+      on:closeBorders={() => bordersOpen = false}
+      on:closePlaces={() => placesOpen = false}
+      on:toggleBorders={handleToggleBorders}
+      on:opacityChange={handleOpacityChange}
+      on:flyTo={e => mapComponent?.flyTo(e.detail.lat, e.detail.lng, e.detail.zoom)}
+    />
+  {/key}
+
   {#if $isNarrativeMode}
-    <!-- Narrative Mode -->
-    <NarrativePlayer />
-    <StepCard />
+    {#key tick}
+      <NarrativePlayer />
+      <StepCard />
+    {/key}
   {:else}
-    <!-- Free Explore Mode -->
     <EventInfo {episodesOpen} />
     <TimeSlider />
   {/if}
 
-  <!-- Area Narrative Dialog -->
   {#if areaDialogArea && !$isNarrativeMode}
     <AreaNarrativeDialog
       area={areaDialogArea}
@@ -148,20 +174,30 @@
     />
   {/if}
 
-  <!-- Credits footer -->
+  {#if resolving}
+    <div class="resolving-chip" aria-hidden="true">
+      resolving <span class="dither-chip"></span>
+    </div>
+  {/if}
+
   <div class="credits-footer">
     <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">
       Historical Borders
     </a>
-    <span>•</span>
+    <span>&#9830;</span>
     <a href="https://carto.com/" target="_blank" rel="noopener">
       CartoDB
     </a>
-    <span>•</span>
+    <span>&#9830;</span>
     <a href="https://www.dancarlin.com/hardcore-history-series/" target="_blank" rel="noopener">
       Hardcore History
     </a>
   </div>
+
+  <div class="dither-layer"></div>
+  <div class="scanlines"></div>
+  <div class="crt-flicker"></div>
+  <div class="vignette"></div>
 </main>
 
 <style>
@@ -172,6 +208,67 @@
     overflow: hidden;
   }
 
+  .scriptorium-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 24px;
+    background: var(--parchment);
+    border-bottom: 2px solid var(--ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    z-index: 1150;
+    pointer-events: none;
+  }
+
+  .scriptorium-topbar .topbar-center {
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+  }
+
+  .scriptorium-topbar .topbar-left,
+  .scriptorium-topbar .topbar-right {
+    font-family: var(--font-mono);
+  }
+
+  @media (max-width: 768px) {
+    .scriptorium-topbar .topbar-center {
+      display: none;
+    }
+    .scriptorium-topbar {
+      font-size: 9px;
+      padding: 8px 12px;
+    }
+  }
+
+  .resolving-chip {
+    position: fixed;
+    top: 46px;
+    right: 20px;
+    z-index: 1160;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-faded);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .resolving-chip :global(.dither-chip) {
+    width: 60px;
+  }
+
   .credits-footer {
     position: fixed;
     bottom: 10px;
@@ -179,28 +276,31 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    font-family: var(--font-mono);
     font-size: 10px;
-    opacity: 0.4;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    opacity: 0.75;
     transition: opacity 0.2s;
     z-index: 100;
   }
 
   .credits-footer:hover {
-    opacity: 0.8;
+    opacity: 1;
   }
 
   .credits-footer a {
-    color: #94a3b8;
+    color: var(--ink);
     text-decoration: none;
-    transition: color 0.2s;
   }
 
   .credits-footer a:hover {
-    color: #60a5fa;
+    color: var(--rubric);
   }
 
   .credits-footer span {
-    color: #64748b;
+    color: var(--ink-faded);
   }
 
   @media (max-width: 768px) {

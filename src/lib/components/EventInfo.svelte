@@ -70,19 +70,22 @@
 <style>
   .event-info {
     position: fixed;
-    top: 80px;
-    left: 360px;
-    width: 280px;
+    top: 140px;
+    left: 380px;
+    width: 300px;
     padding: 16px;
-    border-radius: 16px;
     z-index: 800;
   }
 
   h3 {
-    font-size: 14px;
-    font-weight: 600;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--rubric);
     margin: 0 0 12px;
-    opacity: 0.9;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--ink);
   }
 
   .events-section {
@@ -92,21 +95,26 @@
   .events-section.has-divider {
     margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px dotted var(--ink-faded);
   }
 
   .event-item {
     display: flex;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dotted var(--ink-faded);
   }
 
   .event-item:last-child {
     margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
   .event-icon {
-    font-size: 18px;
+    font-size: 14px;
+    color: var(--rubric);
   }
 
   .event-details {
@@ -116,24 +124,35 @@
   }
 
   .event-name {
-    font-weight: 500;
-    font-size: 13px;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.3;
   }
 
   .event-year {
+    font-family: var(--font-mono);
     font-size: 11px;
-    opacity: 0.6;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
   }
 
   .wiki-link, .listen-link {
+    font-family: var(--font-mono);
     font-size: 11px;
-    color: #60a5fa;
-    text-decoration: none;
-    transition: color 0.2s;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rubric);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: none;
   }
 
   .wiki-link:hover, .listen-link:hover {
-    color: #93c5fd;
+    color: var(--ink);
   }
 
   .related-episode {
@@ -143,20 +162,27 @@
   }
 
   .ep-title {
-    font-weight: 500;
-    font-size: 13px;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.3;
   }
 
   .ep-period {
+    font-family: var(--font-mono);
     font-size: 11px;
-    opacity: 0.6;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
   }
 
   @media (max-width: 768px) {
     .event-info {
       left: 10px;
       top: auto;
-      bottom: 140px;
+      bottom: 180px;
       width: calc(100% - 20px);
     }
   }

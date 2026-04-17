@@ -91,27 +91,15 @@
 <style>
   .queue-stack {
     position: fixed;
-    top: 80px;
+    top: 110px;
     right: 20px;
     width: 300px;
     z-index: 900;
-    animation: slideIn 0.3s ease-out;
     pointer-events: none;
   }
 
   .queue-stack > * {
     pointer-events: auto;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateX(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
   }
 
   .queue-header {
@@ -126,16 +114,17 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--rubric);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgba(226, 232, 240, 0.85);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   }
 
   .queue-icon {
-    font-size: 1rem;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--ink);
   }
 
   .close-btn {
@@ -144,27 +133,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
-    color: #cbd5e1;
-    font-size: 0.875rem;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 12px;
     cursor: pointer;
-    transition: all 0.2s;
-    backdrop-filter: blur(8px);
+    transition: none;
   }
 
-  .close-btn:hover {
-    background: rgba(239, 68, 68, 0.25);
-    color: #fca5a5;
-    transform: scale(1.08);
+  .close-btn:hover,
+  .close-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .stack-area {
     position: relative;
     display: grid;
     grid-template-areas: "stack";
-    /* Generous bottom padding so the deepest offset card doesn't get clipped visually. */
     padding-bottom: 100px;
   }
 
@@ -174,11 +162,12 @@
 
   .peek-card {
     width: 100%;
-    padding: 0.875rem 1.125rem;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 12px 14px;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
     text-align: left;
-    color: inherit;
+    color: var(--ink);
     font: inherit;
     cursor: pointer;
     transform-origin: 50% 40%;
@@ -186,72 +175,78 @@
     opacity: var(--op);
     transition:
       transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2),
-      opacity 0.35s ease,
-      filter 0.25s ease,
-      border-color 0.25s ease,
-      background 0.25s ease;
-    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+      opacity 0.35s ease;
     will-change: transform, opacity;
     font-family: inherit;
   }
 
   .peek-card.up-next {
-    border-color: rgba(96, 165, 250, 0.45);
-    background: rgba(30, 41, 59, 0.85);
-    box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.18);
+    border-color: var(--rubric);
+    box-shadow: 3px 3px 0 var(--rubric);
   }
 
-  .peek-card:hover {
+  .peek-card:hover,
+  .peek-card:focus-visible {
     transform: translate(calc(var(--tx) * 0.3), calc(var(--ty) * 0.95)) rotate(calc(var(--rot) * 0.25)) scale(1.04);
     opacity: 1;
     z-index: 50;
-    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.55));
-    border-color: rgba(96, 165, 250, 0.55);
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
+  }
+  .peek-card:hover *,
+  .peek-card:focus-visible * {
+    color: var(--parchment) !important;
+    border-color: var(--parchment) !important;
   }
 
   .peek-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.5rem;
   }
 
   .peek-number {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 30px;
+    min-width: 28px;
     height: 22px;
-    padding: 0 0.5rem;
-    background: rgba(59, 130, 246, 0.35);
-    color: #dbeafe;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.75rem;
+    padding: 0 6px;
+    background: var(--rubric);
+    color: var(--parchment);
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    border: 1px solid var(--ink);
   }
 
   .peek-card.up-next .peek-number {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+    background: var(--ink);
+    color: var(--parchment);
   }
 
   .peek-year {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
   }
 
   .peek-type {
     margin-left: auto;
-    font-size: 1rem;
+    font-size: 14px;
   }
 
   .peek-title {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: #e2e8f0;
-    line-height: 1.3;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
@@ -261,35 +256,38 @@
 
   .show-queue-btn {
     position: fixed;
-    top: 80px;
+    top: 110px;
     right: 20px;
-    padding: 0.6rem 1rem;
-    border: 1px solid rgba(96, 165, 250, 0.3);
-    border-radius: 10px;
-    background: rgba(30, 41, 59, 0.85);
-    color: #93c5fd;
+    padding: 10px 14px;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    color: var(--ink);
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    transition: none;
     z-index: 900;
   }
 
-  .show-queue-btn:hover {
-    background: rgba(59, 130, 246, 0.25);
-    transform: translateY(-1px);
-    border-color: rgba(96, 165, 250, 0.5);
+  .show-queue-btn:hover,
+  .show-queue-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   @media (max-width: 768px) {
     .queue-stack {
       right: 10px;
-      top: 70px;
+      top: 100px;
       width: 260px;
     }
 
     .show-queue-btn {
-      top: 70px;
+      top: 100px;
       right: 10px;
     }
 

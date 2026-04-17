@@ -26,7 +26,7 @@
 {#if isOpen}
   <div class="border-controls glass">
   <div class="control-header">
-    <span class="control-icon">🗺️</span>
+    <span class="control-icon">&#9670;</span>
     <span class="control-title">Historical Borders</span>
     <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
   </div>
@@ -38,7 +38,7 @@
       on:click={handleToggle}
       title={enabled ? 'Hide borders' : 'Show borders'}
     >
-      {enabled ? '👁️ Visible' : '👁️‍🗨️ Hidden'}
+      {enabled ? 'Visible' : 'Hidden'}
     </button>
   </div>
 
@@ -65,25 +65,9 @@
 <style>
   .border-controls {
     padding: 16px;
-    border-radius: 12px;
     min-width: 220px;
     user-select: none;
-    animation: slideIn 0.3s ease-out;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-left: 10px;
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateY(-10px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
   }
 
   .control-header {
@@ -91,8 +75,8 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
   }
 
   .close-btn {
@@ -101,30 +85,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    color: #94a3b8;
-    font-size: 1rem;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     flex-shrink: 0;
     margin-left: auto;
   }
 
-  .close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f1f5f9;
+  .close-btn:hover,
+  .close-btn:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .control-icon {
-    font-size: 18px;
+    font-size: 14px;
+    color: var(--rubric);
   }
 
   .control-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f1f5f9;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
   .control-row {
@@ -137,54 +126,61 @@
 
   .toggle-button {
     width: 100%;
-    padding: 8px 12px;
-    background: rgba(51, 65, 85, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: #cbd5e1;
-    font-size: 13px;
+    padding: 10px 12px;
+    background: var(--parchment);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: none;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
   }
 
-  .toggle-button:hover {
-    background: rgba(71, 85, 105, 0.7);
-    border-color: rgba(255, 255, 255, 0.2);
+  .toggle-button:hover,
+  .toggle-button:focus-visible {
+    background: var(--ink);
+    color: var(--parchment);
+    outline: none;
   }
 
   .toggle-button.active {
-    background: rgba(59, 130, 246, 0.3);
-    border-color: rgba(59, 130, 246, 0.5);
-    color: #93c5fd;
+    background: var(--ink);
+    color: var(--parchment);
   }
 
   .toggle-button.active:hover {
-    background: rgba(59, 130, 246, 0.4);
+    background: var(--rubric);
   }
 
   .slider-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: #cbd5e1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
     margin-bottom: 6px;
   }
 
   .opacity-value {
-    font-weight: 600;
-    color: #93c5fd;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    color: var(--rubric);
   }
 
   .opacity-slider {
     width: 100%;
     height: 6px;
-    border-radius: 3px;
-    background: rgba(51, 65, 85, 0.6);
+    background: var(--parchment-3);
+    border: 1px solid var(--ink);
     outline: none;
     cursor: pointer;
     -webkit-appearance: none;
@@ -194,32 +190,19 @@
   .opacity-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    width: 14px;
+    height: 14px;
+    background: var(--rubric);
+    border: 2px solid var(--ink);
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
-  }
-
-  .opacity-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
   }
 
   .opacity-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    width: 14px;
+    height: 14px;
+    background: var(--rubric);
+    border: 2px solid var(--ink);
     cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
-  }
-
-  .opacity-slider::-moz-range-thumb:hover {
-    transform: scale(1.2);
   }
 
   @media (max-width: 768px) {
@@ -230,7 +213,6 @@
       max-height: 100%;
       overflow-y: auto;
       margin-left: 0;
-      border-radius: 12px;
     }
 
     .close-btn {
