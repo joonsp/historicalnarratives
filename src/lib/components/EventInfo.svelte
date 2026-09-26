@@ -2,6 +2,7 @@
   import { timeline } from '../stores/timeline';
   import { getEventsForYear, type HistoricalEvent } from '../data/borders';
   import { getEpisodeForYear, type HHEpisode } from '../data/hardcoreHistory';
+  import { eventGlyph } from '../utils/scriptorium';
 
   export let episodesOpen = false;
 
@@ -15,14 +16,6 @@
     relatedEpisode = getEpisodeForYear(currentYear);
   });
 
-  const typeIcons: Record<string, string> = {
-    battle: '⚔️',
-    treaty: '📜',
-    revolution: '🔥',
-    founding: '🏛️',
-    collapse: '💀',
-  };
-
   function formatYear(year: number): string {
     return year < 0 ? `${Math.abs(year)} BCE` : `${year} CE`;
   }
@@ -32,10 +25,10 @@
   <div class="event-info glass">
     {#if visibleEvents.length > 0}
       <div class="events-section" class:has-divider={relatedEpisode && episodesOpen}>
-        <h3>📍 Nearby Events</h3>
+        <h3>&#9670; Nearby Events</h3>
         {#each visibleEvents as event}
           <div class="event-item">
-            <span class="event-icon">{typeIcons[event.type]}</span>
+            <span class="event-icon">{eventGlyph(event.type)}</span>
             <div class="event-details">
               <span class="event-name">{event.name}</span>
               <span class="event-year">{formatYear(event.year)}</span>
@@ -52,7 +45,7 @@
 
     {#if relatedEpisode && episodesOpen}
       <div class="episode-section">
-        <h3>🎙️ Related Episode</h3>
+        <h3>&#x2756; Related Episode</h3>
         <div class="related-episode">
           <span class="ep-title">{relatedEpisode.title}</span>
           <span class="ep-period">

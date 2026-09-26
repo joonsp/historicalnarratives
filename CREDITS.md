@@ -8,11 +8,10 @@
 **Description:** GeoJSON datasets of historical country borders spanning 1000 BCE to 2000 CE. Provides 12 time period snapshots used for the map overlays.
 **Credit:** Ourednik, A. (2018). Historical Basemaps. GitHub repository.
 
-### Map Tiles
-**Provider:** [CartoDB](https://carto.com/)
-**Tile Layer:** Dark Matter
-**License:** CC BY 3.0
-**Description:** Beautiful dark-themed basemap tiles optimized for data visualization.
+### Land Polygons
+**Source:** [Natural Earth](https://www.naturalearthdata.com/) — `ne_50m_land` (1:50m physical vectors)
+**License:** Public domain
+**Description:** Landmasses for the schematic atlas, drawn with a dithered fill instead of raster map tiles. Properties stripped and coordinates rounded to 3 decimals to reduce file size.
 
 ### Podcast Metadata
 **Source:** [Dan Carlin's Hardcore History](https://www.dancarlin.com/hardcore-history-series/)
@@ -35,8 +34,11 @@
   - Used for generating historical narrative journeys
 
 ### Fonts
-- **[Inter](https://fonts.google.com/specimen/Inter)** - Google Fonts
-  - License: SIL Open Font License
+All from Google Fonts, SIL Open Font License:
+- **[Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P)** - pixel display headings
+- **[EB Garamond](https://fonts.google.com/specimen/EB+Garamond)** - body copy
+- **[IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono)** - metadata
+- **[VT323](https://fonts.google.com/specimen/VT323)** - terminal accents
 
 ## Development Tools
 - **Node.js** - JavaScript runtime
@@ -55,7 +57,7 @@ This project was inspired by:
 
 This project is open source. Individual components retain their original licenses:
 - Historical basemaps data: GPL-3.0
-- CartoDB tiles: CC BY 3.0
+- Natural Earth land data: public domain
 - Application code: GPL-3.0
 
 ## Contributing

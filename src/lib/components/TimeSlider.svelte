@@ -88,6 +88,8 @@
     timeline.setYear(parseInt(target.value));
   }
 
+  const ticks = [-500, 0, 500, 1000, 1500];
+
   let yearDisplay: string;
   formattedYear.subscribe(y => yearDisplay = y);
 
@@ -123,35 +125,35 @@
         on:click={() => timeline.stepBackward(50)}
         title="Jump back 50 years"
       >
-        ⏮️
+        ◀︎◀︎
       </button>
       <button 
         class="control-btn" 
         on:click={() => timeline.stepBackward(10)}
         title="Step back 10 years"
       >
-        ◀️
+        ◀︎
       </button>
       <button 
         class="play-btn" 
         on:click={() => timeline.togglePlay()}
         title="Play/Pause (Space)"
       >
-        {currentState.isPlaying ? '⏸️' : '▶️'}
+        {currentState.isPlaying ? '❚❚' : '▶︎'}
       </button>
       <button 
         class="control-btn" 
         on:click={() => timeline.stepForward(10)}
         title="Step forward 10 years"
       >
-        ▶️
+        ▶︎
       </button>
       <button 
         class="control-btn" 
         on:click={() => timeline.stepForward(50)}
         title="Jump forward 50 years"
       >
-        ⏭️
+        ▶︎▶︎
       </button>
     </div>
 
@@ -167,14 +169,26 @@
   <div class="timeline-body">
     <div class="slider-container">
       <span class="slider-label">{currentState.minYear < 0 ? `${Math.abs(currentState.minYear)} BCE` : currentState.minYear}</span>
-      <input
-        type="range"
-        min={currentState.minYear}
-        max={currentState.maxYear}
-        value={currentState.year}
-        on:input={handleSliderInput}
-        class="slider"
-      />
+      <div class="slider-track">
+        <input
+          type="range"
+          min={currentState.minYear}
+          max={currentState.maxYear}
+          value={currentState.year}
+          on:input={handleSliderInput}
+          class="slider"
+          aria-label="Year"
+        />
+        <div class="ticks" aria-hidden="true">
+          {#each ticks as t}
+            <span
+              class="tick"
+              class:passed={t <= currentState.year}
+              style:left="{((t - currentState.minYear) / (currentState.maxYear - currentState.minYear)) * 100}%"
+            >{t < 0 ? `${Math.abs(t)} BCE` : t === 0 ? '0' : t}</span>
+          {/each}
+        </div>
+      </div>
       <span class="slider-label">{currentState.maxYear}</span>
     </div>
 
@@ -306,8 +320,51 @@
     min-width: 70px;
   }
 
-  .slider {
+  .slider-track {
     flex: 1;
+    position: relative;
+    padding-bottom: 16px;
+  }
+
+  .ticks {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    height: 12px;
+  }
+
+  .tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faded);
+    opacity: 0.55;
+    white-space: nowrap;
+  }
+
+  .tick::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    width: 1px;
+    height: 4px;
+    background: currentColor;
+  }
+
+  .tick.passed {
+    color: var(--rubric);
+    opacity: 1;
+  }
+
+  .slider {
+    width: 100%;
+    display: block;
+    accent-color: var(--rubric);
     height: 6px;
     -webkit-appearance: none;
     appearance: none;
@@ -415,6 +472,10 @@
 
     .slider {
       height: 4px;
+    }
+
+    .tick:nth-child(even) {
+      display: none;
     }
 
     .slider::-webkit-slider-thumb {

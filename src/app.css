@@ -111,16 +111,18 @@ body {
   border-color: var(--parchment) !important;
 }
 
+/* Inline busy indicator: a tiny scrolling dither chip, no spinning circles. */
 .spinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(232, 220, 192, 0.4);
-  border-top-color: var(--parchment);
-  border-radius: 50% !important;
-  animation: spin 0.6s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  display: inline-block;
+  width: 24px;
+  height: 10px;
+  vertical-align: middle;
+  background-image:
+    radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1.4px),
+    radial-gradient(circle at 2px 2px, currentColor 0.8px, transparent 1.4px);
+  background-size: 3px 3px, 5px 5px;
+  opacity: 0.8;
+  animation: chip-scroll 0.8s steps(6) infinite;
 }
 
 .seal {
@@ -134,12 +136,27 @@ body {
   box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.25), 2px 2px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* Sea: parchment with a 3px dot grain and a 16px diagonal Ptolemaic hatch */
 .leaflet-container {
-  background: var(--parchment-2) !important;
+  background-color: var(--parchment) !important;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(107, 74, 38, 0.35) 0.6px, transparent 1px),
+    linear-gradient(45deg, transparent calc(50% - 0.3px), rgba(107, 74, 38, 0.2) 50%, transparent calc(50% + 0.3px));
+  background-size: 3px 3px, 16px 16px;
   font-family: var(--font-mono);
 }
-.leaflet-tile {
-  filter: sepia(0.55) contrast(0.9) brightness(1.02) saturate(0.85);
+.leaflet-pane .atlas-land {
+  fill: url(#atlas-land);
+  fill-opacity: 1;
+  stroke: var(--ink);
+  stroke-width: 1.1px;
+  stroke-linejoin: miter;
+  pointer-events: none;
+}
+/* Historical borders: pull the dataset's colours into the sepia palette */
+.leaflet-overlay-pane canvas {
+  filter: sepia(0.45) saturate(0.75) contrast(0.95);
+  mix-blend-mode: multiply;
 }
 .leaflet-control-attribution {
   background: var(--parchment) !important;
@@ -182,69 +199,97 @@ body {
   color: var(--ink) !important;
 }
 
-.seal-marker {
-  width: 30px;
-  height: 30px;
-  border-radius: 50% !important;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 40%),
-    radial-gradient(circle at 50% 50%, var(--seal-fill, var(--rubric)) 0%, var(--seal-shadow, var(--rubric-dim)) 75%, #3d0a0a 100%);
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 rgba(43, 29, 16, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-pixel);
-  font-size: 12px;
-  color: var(--parchment);
-  line-height: 1;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+/* Wax-seal pins (SVG from src/lib/utils/scriptorium.ts) */
+.leaflet-marker-icon.wax-pin {
+  background: transparent;
+  border: none;
 }
-.seal-battle    { --seal-fill: var(--rubric);    --seal-shadow: var(--rubric-dim); }
-.seal-treaty    { --seal-fill: var(--gold);      --seal-shadow: #5a4320; }
-.seal-revolution{ --seal-fill: #a33a1a;          --seal-shadow: #6b1414; }
-.seal-founding  { --seal-fill: var(--scribe);    --seal-shadow: #264a1e; }
-.seal-collapse  { --seal-fill: var(--ink-2);     --seal-shadow: var(--ink); }
+.wax-pin .wax-seal {
+  display: block;
+  overflow: visible;
+  cursor: pointer;
+}
+.wax-seal-halo {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.wax-pin:hover .wax-seal-halo,
+.wax-pin--active .wax-seal-halo {
+  opacity: 1;
+  animation: halo-spin 6s linear infinite;
+}
+@keyframes halo-spin {
+  to { transform: rotate(360deg); }
+}
 
-/* Narrative step seal — larger, with active state + pulse */
-.step-seal {
-  width: 36px;
-  height: 36px;
-  border-radius: 50% !important;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 40%),
-    radial-gradient(circle at 50% 50%, var(--rubric) 0%, var(--rubric-dim) 75%, #3d0a0a 100%);
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 rgba(43, 29, 16, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-pixel);
-  font-size: 11px;
+/* Ink-on-parchment pin tooltip */
+.leaflet-tooltip.seal-tooltip {
+  background: var(--ink);
   color: var(--parchment);
-  position: relative;
+  border: 1px solid var(--ink);
+  box-shadow: 2px 2px 0 rgba(43, 29, 16, 0.6);
+  padding: 8px 12px;
+  white-space: nowrap;
 }
-.step-seal--active {
-  width: 48px;
-  height: 48px;
+.leaflet-tooltip.seal-tooltip::before { display: none; }
+.seal-tooltip-head {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ffb73c;
+}
+.seal-tooltip-title {
+  margin-top: 2px;
+  font-family: var(--font-serif);
+  font-style: italic;
   font-size: 13px;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 40%),
-    radial-gradient(circle at 50% 50%, var(--gold) 0%, #5a4320 75%, #2b1d10 100%);
 }
-.step-seal--active::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border: 1.5px dashed var(--ink);
-  border-radius: 50% !important;
-  animation: seal-pulse 1.8s steps(6) infinite;
+
+/* Sea drifters — mono glyphs wandering in open water */
+.leaflet-marker-icon.sea-drifter-icon {
+  background: none;
+  border: none;
+  overflow: visible;
   pointer-events: none;
 }
-@keyframes seal-pulse {
-  0%, 100% { opacity: 0.3; transform: rotate(0deg); }
-  50%      { opacity: 0.85; transform: rotate(180deg); }
+.sea-drifter,
+.sea-ship {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  pointer-events: none;
 }
+.sea-drifter {
+  font-size: 13px;
+  color: var(--ink-faded);
+  animation:
+    drift var(--dur, 50s) ease-in-out infinite,
+    drift-fade calc(var(--dur, 50s) / 3) steps(6) infinite;
+}
+@keyframes drift {
+  0%, 100% { translate: 0 0; }
+  33%      { translate: 30px 0; }
+  66%      { translate: -20px 0; }
+}
+@keyframes drift-fade {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.75; }
+}
+.sea-ship {
+  font-size: 14px;
+  color: var(--ink);
+  opacity: 0.7;
+  animation: sail 140s linear infinite;
+}
+@keyframes sail {
+  0%, 100% { translate: -120px 0; }
+  50%      { translate: 160px 0; }
+}
+
+.leaflet-pane .graticule { pointer-events: none; }
 
 /* Custom border tooltip */
 .leaflet-tooltip.custom-border-tooltip,
@@ -264,9 +309,16 @@ body {
   display: none;
 }
 
-.leaflet-overlay-pane .coast-base {
-  stroke: var(--ink); stroke-width: 0.8px; fill: none; opacity: 0.55;
+/* Shoreline shimmer: dotted stroke whose opacity steps like pixel twinkle */
+.leaflet-pane .coast-shimmer {
+  stroke: var(--ink); stroke-width: 2.5px; fill: none;
+  stroke-dasharray: 1 5; stroke-linecap: square;
   pointer-events: none;
+  animation: shore-shimmer 3.2s steps(6) infinite;
+}
+@keyframes shore-shimmer {
+  0%, 100% { opacity: 0.08; stroke-dashoffset: 0; }
+  50%      { opacity: 0.3;  stroke-dashoffset: 3; }
 }
 
 .dither-layer {
@@ -322,9 +374,12 @@ body {
   background: radial-gradient(ellipse at center, transparent 55%, rgba(32, 18, 8, 0.35) 100%);
 }
 
-@property --dr-a { syntax: '<number>'; initial-value: 0; inherits: false; }
-@property --dr-b { syntax: '<number>'; initial-value: 0; inherits: false; }
-@property --dr-c { syntax: '<number>'; initial-value: 0; inherits: false; }
+/* Global dither-reveal. Every .glass panel runs it on mount; App re-keys the
+   panels on fireReveal() (src/lib/stores/reveal.ts) to replay it.
+   The custom props must inherit so the ::before/::after dot layers see them. */
+@property --dr-a { syntax: '<number>'; initial-value: 0; inherits: true; }
+@property --dr-b { syntax: '<number>'; initial-value: 0; inherits: true; }
+@property --dr-c { syntax: '<number>'; initial-value: 0; inherits: true; }
 
 @keyframes dither-in {
   0%   { --dr-a: 1;    --dr-b: 1;    --dr-c: 1;    filter: contrast(1.15) brightness(0.95); }
@@ -338,7 +393,10 @@ body {
   100% { clip-path: inset(0 0 0 0); }
 }
 
+.glass,
 .dither-reveal { position: relative; }
+.glass::before,
+.glass::after,
 .dither-reveal::before,
 .dither-reveal::after {
   content: '';
@@ -349,6 +407,7 @@ body {
   mix-blend-mode: multiply;
   background-repeat: repeat;
 }
+.glass::before,
 .dither-reveal::before {
   background-image:
     radial-gradient(circle at 1px 1px, var(--ink) 1px, transparent 1.4px),
@@ -356,18 +415,25 @@ body {
   background-size: 3px 3px, 5px 5px;
   opacity: calc(var(--dr-a, 0) * 0.85);
 }
+.glass::after,
 .dither-reveal::after {
   background-image:
     radial-gradient(circle at 1px 1px, var(--ink) 1.2px, transparent 1.8px);
   background-size: 4px 4px;
   opacity: calc(var(--dr-b, 0) * 0.65);
 }
+.glass,
 .dither-reveal--active {
-  animation: dither-in 900ms steps(8) forwards;
+  animation: dither-in 900ms steps(8);
 }
+/* No fill-mode: a lingering clip-path would clip dropdowns/tooltips. */
+.glass > *,
 .dither-reveal--active > * {
-  animation: line-sweep 900ms steps(14) forwards;
+  animation: line-sweep 900ms steps(14);
 }
+/* Toggled for one reflow by track() to restart the reveal in place. */
+.glass.reveal-reset,
+.glass.reveal-reset > * { animation: none !important; }
 
 /* Inline "resolving" chip */
 .dither-chip {
@@ -413,9 +479,19 @@ a:hover { color: var(--rubric); }
 
 @media (prefers-reduced-motion: reduce) {
   .crt-flicker { animation: none; opacity: calc(var(--flicker) * 0.03); }
-  .dither-reveal--active { animation: none; opacity: 0; animation: fade-quick 150ms forwards; }
+  .glass,
+  .dither-reveal--active { animation: dither-quick 150ms steps(2); }
+  .glass > *,
   .dither-reveal--active > * { animation: none; }
-  .step-seal--active::after { animation: none; opacity: 0.5; }
-  .dither-chip { animation: none; }
-  @keyframes fade-quick { from { opacity: 0.6; } to { opacity: 0; } }
+  .wax-seal-halo,
+  .sea-ship,
+  .compass-rose,
+  .sea-drifter,
+  .coast-shimmer,
+  .spinner,
+  .dither-chip { animation: none !important; }
+  @keyframes dither-quick {
+    from { --dr-a: 0.6; --dr-b: 0.4; }
+    to   { --dr-a: 0;   --dr-b: 0; }
+  }
 }

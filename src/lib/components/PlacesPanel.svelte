@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { track } from '../stores/reveal';
   import { createEventDispatcher } from 'svelte';
   import { fetchPlaceHappenings, type Happening } from '../api/placeHappenings';
   import { generateNarrative } from '../api/narrativeGenerator';
@@ -36,7 +37,7 @@
     hasSearched = true;
 
     try {
-      happenings = await fetchPlaceHappenings(placeInput.trim(), mode, 0);
+      happenings = await track(fetchPlaceHappenings(placeInput.trim(), mode, 0));
       offset = happenings.length;
       if (happenings.length > 0) {
         dispatch('flyTo', {
@@ -59,7 +60,7 @@
     error = '';
 
     try {
-      const more = await fetchPlaceHappenings(placeInput.trim(), mode, offset, happenings.map(h => h.title));
+      const more = await track(fetchPlaceHappenings(placeInput.trim(), mode, offset, happenings.map(h => h.title)));
       happenings = [...happenings, ...more];
       offset += more.length;
     } catch (e) {
@@ -74,9 +75,9 @@
     error = '';
 
     try {
-      const generated = await generateNarrative({
+      const generated = await track(generateNarrative({
         query: `${happening.title} in ${placeInput.trim()}`
-      });
+      }));
       narrative.loadNarrative(generated.id);
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to generate narrative';

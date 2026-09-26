@@ -12,23 +12,14 @@
   import type { HHEpisode } from './lib/data/hardcoreHistory';
   import type L from 'leaflet';
   import { onMount } from 'svelte';
+  import { fireReveal, revealTick as tick, resolving } from './lib/stores/reveal';
+  import AtlasFrame from './lib/components/AtlasFrame.svelte';
 
   let mapComponent: Map;
   let episodesOpen = false;
   let narrativesOpen = false;
   let bordersOpen = false;
   let placesOpen = false;
-
-  let tick = 0;
-  let resolving = false;
-  let resolvingTimer: ReturnType<typeof setTimeout> | null = null;
-
-  function fireReveal() {
-    tick += 1;
-    resolving = true;
-    if (resolvingTimer) clearTimeout(resolvingTimer);
-    resolvingTimer = setTimeout(() => { resolving = false; }, 900);
-  }
 
   let mouseFrame = 0;
   function handleMouseMove(e: MouseEvent) {
@@ -138,6 +129,7 @@
 
 <main>
   <Map bind:this={mapComponent} on:mapClick={handleMapClick} />
+  <AtlasFrame />
 
   <div class="scriptorium-topbar">
     <span class="topbar-left">&#x2756; Historia Narrativa</span>
@@ -145,7 +137,7 @@
     <span class="topbar-right">MMXXVI &middot; Folio I</span>
   </div>
 
-  {#key tick}
+  {#key $tick}
     <CuratedSection
       {episodesOpen}
       on:openEpisodes={toggleEpisodes}
@@ -154,7 +146,7 @@
     />
   {/key}
 
-  {#key tick}
+  {#key $tick}
     <ControlBar
       {narrativesOpen}
       {bordersOpen}
@@ -172,7 +164,7 @@
   {/key}
 
   {#if $isNarrativeMode}
-    {#key tick}
+    {#key $tick}
       <NarrativePlayer />
       <StepCard />
     {/key}
@@ -190,25 +182,12 @@
     />
   {/if}
 
-  {#if resolving}
+  {#if $resolving}
     <div class="resolving-chip" aria-hidden="true">
       resolving <span class="dither-chip"></span>
     </div>
   {/if}
 
-  <div class="credits-footer">
-    <a href="https://github.com/aourednik/historical-basemaps" target="_blank" rel="noopener">
-      Historical Borders
-    </a>
-    <span>&#9830;</span>
-    <a href="https://carto.com/" target="_blank" rel="noopener">
-      CartoDB
-    </a>
-    <span>&#9830;</span>
-    <a href="https://www.dancarlin.com/hardcore-history-series/" target="_blank" rel="noopener">
-      Hardcore History
-    </a>
-  </div>
 
   <div class="dither-layer"></div>
   <div class="scanlines"></div>
@@ -266,10 +245,11 @@
     }
   }
 
+  /* Sits in the top bar, left of the folio mark */
   .resolving-chip {
     position: fixed;
-    top: 46px;
-    right: 20px;
+    top: 11px;
+    right: 190px;
     z-index: 1160;
     font-family: var(--font-mono);
     font-size: 11px;
@@ -283,45 +263,5 @@
   }
   .resolving-chip :global(.dither-chip) {
     width: 60px;
-  }
-
-  .credits-footer {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-faded);
-    opacity: 0.75;
-    transition: opacity 0.2s;
-    z-index: 100;
-  }
-
-  .credits-footer:hover {
-    opacity: 1;
-  }
-
-  .credits-footer a {
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .credits-footer a:hover {
-    color: var(--rubric);
-  }
-
-  .credits-footer span {
-    color: var(--ink-faded);
-  }
-
-  @media (max-width: 768px) {
-    .credits-footer {
-      display: none;
-    }
   }
 </style>

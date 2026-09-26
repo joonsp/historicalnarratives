@@ -42,7 +42,7 @@
         on:click={() => narrative.togglePlay()}
         aria-label={$narrative.isPlaying ? 'Pause' : 'Play'}
       >
-        {$narrative.isPlaying ? '⏸ Pause' : '▶ Play'}
+        {$narrative.isPlaying ? '❚❚ Pause' : '▶︎ Play'}
       </button>
 
       <button

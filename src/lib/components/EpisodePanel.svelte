@@ -89,14 +89,14 @@
   <div class="panel glass">
     <div class="panel-header">
       <div class="header-row">
-        <h2>🎙️ Hardcore History</h2>
+        <h2>&#x2756; Hardcore History</h2>
         <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
       </div>
 
       {#if showRelatedEpisode}
         <div class="related-episode-section">
           <div class="related-header">
-            <span class="related-icon">🎙️</span>
+            <span class="related-icon">&#9670;</span>
             <span class="related-title">Episode Related to selected times</span>
           </div>
           <button
@@ -127,7 +127,7 @@
           on:click={() => timeline.setMode('chronological')}
           title="Chronological Order"
         >
-          📅 Chronological
+          Chronological
         </button>
         <button
           class="mode-btn"
@@ -135,7 +135,7 @@
           on:click={() => timeline.setMode('hh-release')}
           title="Release Order"
         >
-          🎙️ Release
+          Release
         </button>
         <button
           class="mode-btn"
@@ -143,7 +143,7 @@
           on:click={() => timeline.setMode('hh-chronological')}
           title="Historical Order"
         >
-          ⏳ Historical
+          Historical
         </button>
       </div>
 

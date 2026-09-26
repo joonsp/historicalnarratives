@@ -30,8 +30,8 @@
   }
 </script>
 
-<div class="control-bar glass">
-  {#if !$isNarrativeMode}
+{#if !$isNarrativeMode}
+  <div class="control-bar glass">
     <div class="section-label">&#9670; Archive</div>
     <div class="button-row">
       <button
@@ -61,8 +61,8 @@
         <span class="btn-label">Places</span>
       </button>
     </div>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <!-- Panels rendered outside .glass to avoid backdrop-filter containing block on mobile -->
 {#if !$isNarrativeMode && (narrativesOpen || bordersOpen || placesOpen)}

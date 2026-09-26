@@ -14,6 +14,8 @@
   import type { HistoricalEvent, BorderCollection, BorderFeature } from '../data/borders';
   import type { NarrativeStep } from '../data/narrativeTimelines';
   import { getNarrativeById } from '../data/narrativeTimelines';
+  import { track } from '../stores/reveal';
+  import { toRoman, formatYear, eventGlyph, waxSealSvg, waxSealSize, SEAL_COLORS } from '../utils/scriptorium';
 
   const dispatch = createEventDispatcher<{
     mapClick: { latlng: L.LatLng; containerPoint: L.Point };
@@ -36,24 +38,22 @@
   let bordersEnabled = true; // Enabled by default
   let borderOpacity = 0.25;
 
-  // Event type glyphs — short monospace symbols that render crisply at small sizes
-  const eventGlyphs: Record<string, string> = {
-    battle: '+',
-    treaty: '§',
-    revolution: '*',
-    founding: '■',
-    collapse: 'x',
-  };
-
   function createEventIcon(event: HistoricalEvent): L.DivIcon {
     const type = event.type || 'battle';
-    const glyph = eventGlyphs[type] || '•';
+    const colors = SEAL_COLORS[type] ?? SEAL_COLORS.battle;
+    const r = 11;
+    const size = waxSealSize(r);
     return L.divIcon({
-      className: 'custom-event-marker',
-      html: `<div class="seal-marker seal-${type}"><span>${glyph}</span></div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15],
+      className: 'wax-pin',
+      html: waxSealSvg({ label: eventGlyph(type), r, pixel: false, fontSize: 11, ...colors }),
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
     });
+  }
+
+  /** Two-line ink tooltip: amber "N° · year" over an italic serif title. */
+  function sealTooltip(head: string, title: string): string {
+    return `<div class="seal-tooltip-head">${head}</div><div class="seal-tooltip-title">${title}</div>`;
   }
 
   function updateMarkers(year: number) {
@@ -69,13 +69,19 @@
         icon: createEventIcon(event),
       });
 
-      const yearStr = event.year < 0 ? `${Math.abs(event.year)} BCE` : `${event.year} CE`;
-      
+      const yearStr = formatYear(event.year);
+
+      marker.bindTooltip(sealTooltip(`${event.type} · ${yearStr}`, event.name), {
+        direction: 'top',
+        offset: [0, -14],
+        className: 'seal-tooltip',
+      });
+
       marker.bindPopup(`
         <div style="min-width: 200px; color: var(--ink);">
           <h3 style="margin: 0 0 8px; font-family: var(--font-pixel); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink);">${event.name}</h3>
           <p style="margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded);">${yearStr}</p>
-          <p style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${event.description}</p>
+          <p class="drop-cap" style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${event.description}</p>
           ${event.wikipediaUrl ? `<a href="${event.wikipediaUrl}" target="_blank" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rubric); text-decoration: underline;">Learn more →</a>` : ''}
         </div>
       `);
@@ -97,12 +103,15 @@
    * Create a custom marker for narrative steps
    */
   function createNarrativeStepMarker(step: NarrativeStep, isCurrent: boolean = false): L.DivIcon {
-    const size = isCurrent ? 48 : 36;
-    const activeClass = isCurrent ? 'step-seal--active' : '';
+    const r = isCurrent ? 16 : 11;
+    const size = waxSealSize(r);
+    const colors = isCurrent
+      ? { fill: '#8a6a2b', shade: '#5a4320', highlight: '#b8923f' }
+      : SEAL_COLORS.battle;
 
     return L.divIcon({
-      className: 'narrative-step-marker',
-      html: `<div class="step-seal ${activeClass}">${step.sequenceNumber}</div>`,
+      className: `wax-pin${isCurrent ? ' wax-pin--active' : ''}`,
+      html: waxSealSvg({ label: toRoman(step.sequenceNumber), r, ...colors }),
       iconSize: [size, size],
       iconAnchor: [size / 2, size / 2],
     });
@@ -148,7 +157,7 @@
       zIndexOffset: 1000
     });
 
-    const yearStr = step.year < 0 ? `${Math.abs(step.year)} BCE` : `${step.year} CE`;
+    const yearStr = formatYear(step.year);
 
     marker.bindPopup(`
       <div style="min-width: 250px; max-width: 350px; color: var(--ink);">
@@ -163,10 +172,10 @@
             font-size: 10px;
             letter-spacing: 0.05em;
             white-space: nowrap;
-          ">#${step.sequenceNumber}</span>
+          " aria-label="Step ${step.sequenceNumber}">N° ${toRoman(step.sequenceNumber)}</span>
         </div>
         <p style="margin: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faded);">${yearStr}</p>
-        <p style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${step.description}</p>
+        <p class="drop-cap" style="margin: 0 0 12px; font-family: var(--font-serif); color: var(--ink-2); line-height: 1.5;">${step.description}</p>
         ${step.links && step.links.length > 0 ? `
           <div style="border-top: 1px dotted var(--ink-faded); padding-top: 12px;">
             ${step.links.map(link => `
@@ -220,32 +229,26 @@
       className: 'narrative-path'
     }).addTo(map);
 
-    // Add markers for each step (except current)
+    // Small seal for every step; the current step's large seal sits on top
     clearNarrativeMarkers();
     steps.forEach((step, index) => {
-      if (index !== $narrative.currentStepIndex) {
-        const marker = L.marker(step.location, {
-          icon: createNarrativeStepMarker(step, false),
-          zIndexOffset: 100 + index
-        });
+      const marker = L.marker(step.location, {
+        icon: createNarrativeStepMarker(step, false),
+        zIndexOffset: 100 + index
+      });
 
-        const yearStr = step.year < 0 ? `${Math.abs(step.year)} BCE` : `${step.year} CE`;
+      marker.bindTooltip(sealTooltip(`N° ${toRoman(step.sequenceNumber)} · ${formatYear(step.year)}`, step.title), {
+        direction: 'top',
+        offset: [0, -14],
+        className: 'seal-tooltip',
+      });
 
-        marker.bindTooltip(`
-          <strong style="font-family: var(--font-pixel); font-size: 10px; letter-spacing: 0.06em;">#${step.sequenceNumber}: ${step.title}</strong><br>
-          <span style="font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.8;">${yearStr}</span>
-        `, {
-          direction: 'top',
-          offset: [0, -20]
-        });
+      marker.on('click', () => {
+        narrative.jumpToStep(index);
+      });
 
-        marker.on('click', () => {
-          narrative.jumpToStep(index);
-        });
-
-        marker.addTo(map);
-        narrativeMarkers.push(marker);
-      }
+      marker.addTo(map);
+      narrativeMarkers.push(marker);
     });
   }
 
@@ -302,9 +305,9 @@
   function getStyleOptions(feature?: any): L.PathOptions {
     if (!feature || !feature.properties) {
       return {
-        fillColor: '#78909c',
+        fillColor: '#6b4a26',
         fillOpacity: borderOpacity,
-        color: '#78909c',
+        color: '#6b4a26',
         weight: 1,
         opacity: borderOpacity * 2.5,
       };
@@ -382,7 +385,7 @@
 
     if (!layer) {
       // Load new borders
-      const data = await loadBordersForYear(year);
+      const data = await track(loadBordersForYear(year), { reveal: false });
       if (!data || !data.features || data.features.length === 0) {
         currentBorderYear = snapshot.year;
         return;
@@ -418,6 +421,52 @@
     }
   }
 
+  /** Dashed Ptolemaic graticule at ±30°/±60° latitude and every 60° longitude. */
+  function addGraticule(renderer: L.Renderer) {
+    const style: L.PolylineOptions = {
+      renderer,
+      pane: 'atlas',
+      interactive: false,
+      className: 'graticule',
+      color: '#6b4a26',
+      weight: 0.6,
+      opacity: 0.4,
+      dashArray: '2 4',
+    };
+    for (const lat of [-60, -30, 0, 30, 60]) {
+      L.polyline([[lat, -180], [lat, 180]], style).addTo(map);
+    }
+    for (const lng of [-120, -60, 0, 60, 120]) {
+      L.polyline([[-85, lng], [85, lng]], style).addTo(map);
+    }
+  }
+
+  // Mono glyphs drifting in open water, plus one small ship.
+  const seaDrifters: { glyph: string; at: [number, number]; dur: number }[] = [
+    { glyph: '~~', at: [42, -38], dur: 45 },
+    { glyph: '<><', at: [-28, -18], dur: 60 },
+    { glyph: 'ooo', at: [22, -150], dur: 55 },
+    { glyph: '≈≈', at: [-32, -115], dur: 38 },
+    { glyph: '*', at: [-22, 78], dur: 70 },
+    { glyph: 'ψ', at: [62, -14], dur: 50 },
+    { glyph: '<><', at: [45.5, -9], dur: 52 },
+    { glyph: '~~', at: [35.2, 18], dur: 42 },
+    { glyph: '≈≈', at: [14, 62], dur: 48 },
+  ];
+
+  function addSeaDrifters() {
+    const opts = (html: string): L.MarkerOptions => ({
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: -1000,
+      icon: L.divIcon({ className: 'sea-drifter-icon', html, iconSize: [0, 0] }),
+    });
+    for (const d of seaDrifters) {
+      L.marker(d.at, opts(`<span class="sea-drifter" style="--dur:${d.dur}s">${d.glyph}</span>`)).addTo(map);
+    }
+    L.marker([36, -30], opts('<svg class="sea-ship" width="16" height="14" viewBox="0 0 16 14"><path d="M8 0v10H2l6-10zM9 2l5 8H9z" fill="currentColor"/><path d="M0 11h16l-3 3H3z" fill="currentColor"/></svg>')).addTo(map);
+  }
+
   onMount(() => {
     // Initialize Canvas renderer for better border performance
     canvasRenderer = L.canvas();
@@ -431,29 +480,27 @@
     // Add zoom control to bottom right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Parchment-tinted tile layer (CartoDB Voyager, no labels) — see app.css for the sepia filter
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0) | Coastlines: <a href="https://www.naturalearthdata.com/">Natural Earth</a>',
-      subdomains: 'abcd',
-      maxZoom: 19
-    }).addTo(map);
-
-    const svgRenderer = L.svg({ padding: 0.1 });
-    fetch('/data/coastlines/ne_50m_coastline.geojson')
-      .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
-      .then((coastGeo) => {
+    // Schematic atlas instead of raster tiles: dithered Natural Earth land on a
+    // hatched parchment sea (see app.css + the <pattern> defs below).
+    map.attributionControl.addAttribution(
+      'Land: <a href="https://www.naturalearthdata.com/">Natural Earth</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0) | <a href="https://www.dancarlin.com/hardcore-history-series/">Hardcore History</a>'
+    );
+    map.createPane('atlas').style.zIndex = '250';
+    const atlasRenderer = L.svg({ pane: 'atlas', padding: 0.5 });
+    addGraticule(atlasRenderer);
+    addSeaDrifters();
+    track(fetch('/data/coastlines/ne_50m_land.geojson').then(r => r.ok ? r.json() : Promise.reject(r.statusText)), { reveal: false })
+      .then((landGeo) => {
         if (!map) return;
-        L.geoJSON(coastGeo, {
-          style: {
-            stroke: true,
-            fill: false,
-            renderer: svgRenderer,
-            interactive: false,
-            className: 'coast-base',
-          },
-        }).addTo(map);
+        // Dithered land fill + ink outline, then a stepped dotted shore shimmer
+        for (const className of ['atlas-land', 'coast-shimmer']) {
+          L.geoJSON(landGeo, {
+            pane: 'atlas',
+            style: { renderer: atlasRenderer, interactive: false, className },
+          }).addTo(map);
+        }
       })
-      .catch((err) => console.warn('coastline layer failed to load', err));
+      .catch((err) => console.warn('land layer failed to load', err));
 
     // Map click → area narrative dialog (skip in narrative mode)
     map.on('click', (e: L.LeafletMouseEvent) => {
@@ -491,21 +538,19 @@
     });
 
     // Subscribe to narrative to draw path when narrative loads
+    // Draw the dotted chronological route once, when a narrative loads.
+    // (Reads the narrative directly: derived stores haven't updated yet here.)
+    let drawnNarrativeId: string | null = null;
     const unsubscribeNarrativeState = narrative.subscribe(state => {
-      if (state.currentNarrativeId && state.currentStepIndex === 0) {
-        const currentNarrative = $currentStep;
-        if (currentNarrative) {
-          // Get all steps from the narrative
-          const narrativeId = state.currentNarrativeId;
-          const allSteps = Array.from({ length: 20 }, (_, i) => {
-            const n = getNarrativeById(narrativeId);
-            return n?.steps[i];
-          }).filter(Boolean) as NarrativeStep[];
-
-          if (allSteps.length > 1) {
-            drawNarrativePath(allSteps);
-          }
-        }
+      if (!state.currentNarrativeId) {
+        drawnNarrativeId = null;
+        return;
+      }
+      if (state.currentNarrativeId === drawnNarrativeId) return;
+      const steps = getNarrativeById(state.currentNarrativeId)?.steps ?? [];
+      if (steps.length > 1) {
+        drawNarrativePath(steps);
+        drawnNarrativeId = state.currentNarrativeId;
       }
     });
 
@@ -531,7 +576,24 @@
 
 <div bind:this={mapContainer} class="map-container"></div>
 
+<svg class="atlas-defs" width="0" height="0" aria-hidden="true">
+  <defs>
+    <pattern id="atlas-land" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#d9c9a3" />
+      <circle cx="1" cy="1" r="0.7" fill="#2b1d10" opacity="0.4" />
+      <rect x="2" y="2" width="1" height="1" fill="#2b1d10" opacity="0.3" />
+    </pattern>
+  </defs>
+</svg>
+
 <style>
+  .atlas-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
   .map-container {
     width: 100%;
     height: 100%;
@@ -544,25 +606,7 @@
   /* Leaflet popup + tooltip + marker styles are defined globally in app.css.
      Only component-scoped overrides below. */
 
-  :global(.custom-event-marker) {
-    background: transparent !important;
-    border: none !important;
-  }
-
-  :global(.custom-event-marker .seal-marker:hover) {
-    transform: scale(1.15);
-  }
-
   /* Narrative mode styles */
-  :global(.narrative-step-marker) {
-    background: transparent !important;
-    border: none !important;
-  }
-
-  :global(.narrative-step-marker .step-seal:hover) {
-    transform: scale(1.1);
-  }
-
   :global(.narrative-path) {
     animation: dash 1.5s linear infinite;
   }

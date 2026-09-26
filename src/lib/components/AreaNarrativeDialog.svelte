@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { track } from '../stores/reveal';
   import { createEventDispatcher } from 'svelte';
   import { formattedYear, timeline } from '../stores/timeline';
   import { narrative } from '../stores/narrative';
@@ -43,7 +44,7 @@
       (area.modernName ? ` Modern name: ${area.modernName}.` : '');
 
     try {
-      const generated = await generateNarrative({ query });
+      const generated = await track(generateNarrative({ query }));
       dispatch('narrativeLoaded', { id: generated.id });
     } catch (e) {
       error = e instanceof Error ? e.message : 'Failed to generate narrative';

@@ -59,9 +59,9 @@ Component communication uses Svelte events and component bindings:
   - Uses `bind:this={mapComponent}` to call `flyTo()` method on Map component
   - Listens to `on:episodeSelect` from EpisodePanel
 
-- **`Map.svelte`**: Leaflet map with CartoDB dark tiles
+- **`Map.svelte`**: Leaflet map drawn as a schematic atlas (no raster tiles): Natural Earth land (`public/data/coastlines/ne_50m_land.geojson`) with a dithered SVG pattern fill, graticule, sea drifters
   - Subscribes to timeline store and updates markers reactively
-  - Creates custom DivIcon markers with emoji based on event type
+  - Markers are SVG wax seals (`waxSealSvg()` in `src/lib/utils/scriptorium.ts`): glyph per event type, Roman numerals for narrative steps
   - Uses `updateMarkers()` to show/hide events based on current year
 
 - **`TimeSlider.svelte`**: Timeline controls and keyboard shortcuts
@@ -78,8 +78,9 @@ Component communication uses Svelte events and component bindings:
 ### Styling
 
 - **Tailwind CSS v4** with Vite plugin (not PostCSS)
-- Global glassmorphism styles in `src/app.css` (`.glass` class)
-- Dark theme optimized for CartoDB dark tile layer
+- "Scriptorium" design (sepia parchment + CRT): tokens, CRT overlays and the dither-reveal live in `src/app.css`; `.glass` is the parchment panel class and plays the reveal on mount
+- Loader: `src/lib/stores/reveal.ts` — `fireReveal()` re-keys panels (page-change feel), `track(promise)` shows the "resolving" chip and replays the reveal in place without remounting
+- No emoji/icon libraries: use the glyph repertoire (◆ ❖ ✺ ✽ etc.)
 - Component-scoped styles in Svelte `<style>` blocks
 
 ## Tech Stack Details
@@ -94,7 +95,7 @@ Component communication uses Svelte events and component bindings:
 
 1. **Negative years for BCE**: Historical events before year 0 use negative numbers (e.g., -480 for 480 BCE)
 2. **Store-first architecture**: Timeline state lives in the store, components subscribe and react
-3. **Custom Leaflet markers**: DivIcon with inline styles, emoji-based event type indicators
+3. **Custom Leaflet markers**: DivIcon wrapping an SVG wax seal (glyph or Roman numeral imprint)
 4. **Component method calls**: Parent components use `bind:this` to call child methods directly
 5. **Time-based filtering**: Events appear/disappear based on `getEventsForYear()` with ±2 year tolerance
 

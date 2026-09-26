@@ -1,6 +1,7 @@
 <script lang="ts">
   import { narrative, currentNarrative } from '../stores/narrative';
   import type { NarrativeStep } from '../data/narrativeTimelines';
+  import { eventGlyph, toRoman } from '../utils/scriptorium';
 
   function formatYear(year: number): string {
     if (year < 0) {
@@ -8,17 +9,6 @@
     }
     return `${year} CE`;
   }
-
-  const eventTypeEmojis: Record<string, string> = {
-    battle: '⚔️',
-    treaty: '📜',
-    journey: '🗺️',
-    discovery: '🔍',
-    decision: '⚖️',
-    founding: '🏛️',
-    siege: '🏰',
-    crossing: '🌊',
-  };
 
   const STACK_SIZE = 4;
 
@@ -43,7 +33,7 @@
   <div class="queue-stack">
     <div class="queue-header">
       <span class="queue-label">
-        <span class="queue-icon">🃏</span>
+        <span class="queue-icon">&#x273D;</span>
         Up next · {totalRemaining}
       </span>
       <button
@@ -66,12 +56,12 @@
           style:--op={1 - i * 0.1}
           style:z-index={STACK_SIZE + 5 - i}
           on:click={() => narrative.jumpToStep($narrative.currentStepIndex + i + 1)}
-          title="Jump to #{peek.sequenceNumber} · {peek.title}"
+          title="Jump to step {peek.sequenceNumber} · {peek.title}"
         >
           <div class="peek-header">
-            <span class="peek-number">#{peek.sequenceNumber}</span>
+            <span class="peek-number" aria-label="Step {peek.sequenceNumber}">N° {toRoman(peek.sequenceNumber)}</span>
             <span class="peek-year">{formatYear(peek.year)}</span>
-            <span class="peek-type">{eventTypeEmojis[peek.eventType] || '📍'}</span>
+            <span class="peek-type">{eventGlyph(peek.eventType)}</span>
           </div>
           <div class="peek-title">{peek.title}</div>
         </button>
@@ -84,7 +74,7 @@
     on:click={() => narrative.toggleStepCard()}
     aria-label="Show queue"
   >
-    🃏 Queue · {totalRemaining}
+    &#x273D; Queue · {totalRemaining}
   </button>
 {/if}
 

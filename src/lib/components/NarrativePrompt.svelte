@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { track } from '../stores/reveal';
   import { narrative } from '../stores/narrative';
   import { generateNarrative, isAIGenerationAvailable } from '../api/narrativeGenerator';
 
@@ -22,7 +23,7 @@
     error = '';
 
     try {
-      const generated = await generateNarrative({ query: query.trim() });
+      const generated = await track(generateNarrative({ query: query.trim() }));
       narrative.loadNarrative(generated.id);
       query = ''; // Clear input on success
     } catch (e) {
@@ -41,7 +42,7 @@
 <div class="narrative-prompt glass">
   {#if !aiAvailable}
     <div class="warning-compact">
-      ⚠️ AI unavailable - add VITE_ANTHROPIC_API_KEY to .env
+      &#x273A; AI unavailable - add VITE_ANTHROPIC_API_KEY to .env
     </div>
   {:else}
     <form on:submit|preventDefault={handleSubmit}>
@@ -57,7 +58,7 @@
         {#if isGenerating}
           <span class="spinner"></span>
         {:else}
-          ✨
+          &#x273D;
         {/if}
       </button>
     </form>

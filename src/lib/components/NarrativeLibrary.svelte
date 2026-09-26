@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { track } from '../stores/reveal';
   import { onMount, createEventDispatcher } from 'svelte';
   import { narrative, isNarrativeMode } from '../stores/narrative';
   import { sampleNarratives } from '../data/sampleNarratives';
@@ -104,7 +105,7 @@
     error = '';
 
     try {
-      const generated = await generateNarrative({ query: aiQuery.trim() });
+      const generated = await track(generateNarrative({ query: aiQuery.trim() }));
       narrative.loadNarrative(generated.id);
       aiQuery = ''; // Clear input on success
       activeTab = 'browse'; // Switch back to browse after generation
@@ -127,7 +128,7 @@
     scrapedContent = null;
 
     try {
-      scrapedContent = await scrapeUrl(urlInput.trim());
+      scrapedContent = await track(scrapeUrl(urlInput.trim()));
       urlStep = 'preview';
     } catch (e) {
       scrapeError = e instanceof Error ? e.message : 'Failed to extract content from URL';
@@ -143,13 +144,13 @@
     scrapeError = '';
 
     try {
-      const generated = await generateNarrativeFromContent({
+      const generated = await track(generateNarrativeFromContent({
         sourceContent: scrapedContent.content,
         sourceTitle: scrapedContent.title,
         sourceUrl: scrapedContent.sourceUrl,
         sourceType: scrapedContent.sourceType,
         focusQuery: focusQuery.trim() || undefined,
-      });
+      }));
       narrative.loadNarrative(generated.id);
 
       // Reset state
@@ -190,7 +191,7 @@
     <!-- Header with tabs -->
     <div class="library-header">
       <div class="header-row">
-        <h2>📚 Historical Journeys</h2>
+        <h2>&#x2756; Historical Journeys</h2>
         <button class="close-btn" on:click={() => dispatch('close')} title="Close">✕</button>
       </div>
       <div class="tabs">
@@ -206,7 +207,7 @@
           class:active={activeTab === 'create'}
           on:click={() => activeTab = 'create'}
         >
-          ✨ Create
+          &#x273D; Create
         </button>
         <button
           class="tab-btn"
@@ -262,8 +263,8 @@
 
             <!-- Metadata -->
             <div class="narrative-meta">
-              <span title="Number of locations">📍 {n.steps.length} steps</span>
-              <span title="Estimated duration">⏱ {formatDuration(n.totalDuration)}</span>
+              <span title="Number of locations">&#9670; {n.steps.length} steps</span>
+              <span title="Estimated duration">&#x273A; {formatDuration(n.totalDuration)}</span>
               <span title="Time period">{formatYearRange(n.startYear, n.endYear)}</span>
             </div>
 
@@ -278,7 +279,7 @@
 
             <!-- Creator badge -->
             {#if n.createdBy === 'ai'}
-              <span class="ai-badge">🤖 AI Generated</span>
+              <span class="ai-badge">&#x273D; Scribed by AI</span>
             {/if}
           </div>
         {/each}
@@ -287,12 +288,12 @@
     {:else if activeTab === 'create'}
       <!-- Create tab: AI generation -->
       <div class="create-panel">
-        <h3>🤖 AI Historical Journeys</h3>
+        <h3>&#9670; AI Historical Journeys</h3>
 
         {#if !aiAvailable}
           <div class="warning">
             <p>
-              <strong>⚠️ Backend Server Required</strong><br />
+              <strong>&#x273A; Backend Server Required</strong><br />
               AI generation requires the backend server to be running. Follow these steps:
             </p>
             <ol style="margin: 0.5rem 0; padding-left: 1.5rem; font-size: 0.875rem;">
@@ -321,7 +322,7 @@
                 <span class="spinner"></span>
                 Generating...
               {:else}
-                ✨ Generate
+                &#x273D; Generate
               {/if}
             </button>
           </form>
