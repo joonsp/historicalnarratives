@@ -483,7 +483,7 @@
     // Schematic atlas instead of raster tiles: dithered Natural Earth land on a
     // hatched parchment sea (see app.css + the <pattern> defs below).
     map.attributionControl.addAttribution(
-      'Land: <a href="https://www.naturalearthdata.com/">Natural Earth</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0) | <a href="https://www.dancarlin.com/hardcore-history-series/">Hardcore History</a>'
+      'Land: <a href="https://www.naturalearthdata.com/">Natural Earth</a> | Borders: <a href="https://github.com/aourednik/historical-basemaps">Ourednik</a> (GPL-3.0)'
     );
     map.createPane('atlas').style.zIndex = '250';
     const atlasRenderer = L.svg({ pane: 'atlas', padding: 0.5 });

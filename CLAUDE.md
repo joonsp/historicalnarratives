@@ -40,7 +40,7 @@ The app uses Svelte stores (not Svelte 5 runes) for global state:
 
 Historical data is static TypeScript objects in `src/lib/data/`:
 
-- **`hardcoreHistory.ts`**: Podcast episode metadata
+- **`hardcoreHistory.ts`**: Podcast episode metadata (currently unused in the UI; the episode browser was removed)
   - `HHEpisode` interface with geographic coordinates, time periods, and episode details
   - Helper functions: `getEpisodesByReleaseDate()`, `getEpisodesByPeriod()`, `getEpisodeForYear()`
   - Episodes span from ancient Persia (-550) to WWII (1945)
@@ -55,9 +55,8 @@ Historical data is static TypeScript objects in `src/lib/data/`:
 
 Component communication uses Svelte events and component bindings:
 
-- **`App.svelte`**: Root component orchestrating Map, TimeSlider, EpisodePanel, and EventInfo
+- **`App.svelte`**: Root component orchestrating Map, TimeSlider, ControlBar, narrative player and EventInfo
   - Uses `bind:this={mapComponent}` to call `flyTo()` method on Map component
-  - Listens to `on:episodeSelect` from EpisodePanel
 
 - **`Map.svelte`**: Leaflet map drawn as a schematic atlas (no raster tiles): Natural Earth land (`public/data/coastlines/ne_50m_land.geojson`) with a dithered SVG pattern fill, graticule, sea drifters
   - Subscribes to timeline store and updates markers reactively
@@ -69,11 +68,7 @@ Component communication uses Svelte events and component bindings:
   - Animation loop using `setInterval` with speed-based timing
   - Mode switcher for chronological vs. Hardcore History ordering
 
-- **`EpisodePanel.svelte`**: Episode browser with filtering by mode
-  - Dispatches `episodeSelect` custom events with episode data
-  - Lists episodes sorted by release date or chronological period
-
-- **`EventInfo.svelte`**: Info overlay for events and episodes
+- **`EventInfo.svelte`**: "Nearby events" overlay for the current year
 
 ### Styling
 

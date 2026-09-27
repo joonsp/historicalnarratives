@@ -5,18 +5,15 @@
   import NarrativePlayer from './lib/components/NarrativePlayer.svelte';
   import StepCard from './lib/components/StepCard.svelte';
   import ControlBar from './lib/components/ControlBar.svelte';
-  import CuratedSection from './lib/components/CuratedSection.svelte';
   import AreaNarrativeDialog from './lib/components/AreaNarrativeDialog.svelte';
   import { isNarrativeMode, narrative } from './lib/stores/narrative';
   import { detectArea, type DetectedArea } from './lib/utils/areaDetection';
-  import type { HHEpisode } from './lib/data/hardcoreHistory';
   import type L from 'leaflet';
   import { onMount } from 'svelte';
   import { fireReveal, revealTick as tick, resolving } from './lib/stores/reveal';
   import AtlasFrame from './lib/components/AtlasFrame.svelte';
 
   let mapComponent: Map;
-  let episodesOpen = false;
   let narrativesOpen = false;
   let bordersOpen = false;
   let placesOpen = false;
@@ -54,7 +51,6 @@
     const seq = ++clickSeq;
 
     // Close open panels
-    episodesOpen = false;
     narrativesOpen = false;
     bordersOpen = false;
     placesOpen = false;
@@ -77,11 +73,6 @@
     fireReveal();
   }
 
-  function handleEpisodeSelect(event: CustomEvent<HHEpisode>) {
-    const episode = event.detail;
-    mapComponent?.flyTo(episode.center[0], episode.center[1], episode.zoom);
-  }
-
   function handleToggleBorders() {
     mapComponent?.toggleBorders();
   }
@@ -90,20 +81,9 @@
     mapComponent?.setBorderOpacity(event.detail);
   }
 
-  function toggleEpisodes() {
-    episodesOpen = !episodesOpen;
-    if (episodesOpen) {
-      narrativesOpen = false;
-      bordersOpen = false;
-      placesOpen = false;
-      fireReveal();
-    }
-  }
-
   function toggleNarratives() {
     narrativesOpen = !narrativesOpen;
     if (narrativesOpen) {
-      episodesOpen = false;
       bordersOpen = false;
       placesOpen = false;
       fireReveal();
@@ -113,7 +93,6 @@
   function toggleBorders() {
     bordersOpen = !bordersOpen;
     if (bordersOpen) {
-      episodesOpen = false;
       narrativesOpen = false;
       placesOpen = false;
       fireReveal();
@@ -123,7 +102,6 @@
   function togglePlaces() {
     placesOpen = !placesOpen;
     if (placesOpen) {
-      episodesOpen = false;
       narrativesOpen = false;
       bordersOpen = false;
       fireReveal();
@@ -140,15 +118,6 @@
     <span class="topbar-center">&mdash; SCRIPTORIUM EDITION &mdash;</span>
     <span class="topbar-right">MMXXVI &middot; Folio I</span>
   </div>
-
-  {#key $tick}
-    <CuratedSection
-      {episodesOpen}
-      on:openEpisodes={toggleEpisodes}
-      on:closeEpisodes={() => episodesOpen = false}
-      on:episodeSelect={handleEpisodeSelect}
-    />
-  {/key}
 
   {#key $tick}
     <ControlBar
@@ -173,7 +142,7 @@
       <StepCard />
     {/key}
   {:else}
-    <EventInfo {episodesOpen} />
+    <EventInfo />
     <TimeSlider />
   {/if}
 
