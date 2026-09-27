@@ -487,18 +487,25 @@
     );
     map.createPane('atlas').style.zIndex = '250';
     const atlasRenderer = L.svg({ pane: 'atlas', padding: 0.5 });
+    // The shimmer gets its own pane so its twinkle is a compositor-only opacity
+    // animation on the pane; animating the paths themselves repaints the whole
+    // land SVG several times a second.
+    map.createPane('shimmer', map.getPane('atlas')).classList.add('shimmer-pane');
+    const shimmerRenderer = L.svg({ pane: 'shimmer', padding: 0.5 });
     addGraticule(atlasRenderer);
     addSeaDrifters();
     track(fetch('/data/coastlines/ne_50m_land.geojson').then(r => r.ok ? r.json() : Promise.reject(r.statusText)), { reveal: false })
       .then((landGeo) => {
         if (!map) return;
-        // Dithered land fill + ink outline, then a stepped dotted shore shimmer
-        for (const className of ['atlas-land', 'coast-shimmer']) {
-          L.geoJSON(landGeo, {
-            pane: 'atlas',
-            style: { renderer: atlasRenderer, interactive: false, className },
-          }).addTo(map);
-        }
+        // Dithered land fill + ink outline, then a dotted shore shimmer on top
+        L.geoJSON(landGeo, {
+          pane: 'atlas',
+          style: { renderer: atlasRenderer, interactive: false, className: 'atlas-land' },
+        }).addTo(map);
+        L.geoJSON(landGeo, {
+          pane: 'shimmer',
+          style: { renderer: shimmerRenderer, interactive: false, className: 'coast-shimmer' },
+        }).addTo(map);
       })
       .catch((err) => console.warn('land layer failed to load', err));
 

@@ -21,13 +21,17 @@
   let bordersOpen = false;
   let placesOpen = false;
 
+  // Cursor position for the dither overlay's clear-hole mask. Set on the
+  // overlay itself: on <html> the inherited custom props would restyle every
+  // element (thousands of map paths) on each mouse move.
+  let ditherLayer: HTMLDivElement;
   let mouseFrame = 0;
   function handleMouseMove(e: MouseEvent) {
     if (mouseFrame) return;
     const { clientX, clientY } = e;
     mouseFrame = requestAnimationFrame(() => {
-      document.documentElement.style.setProperty('--mx', `${clientX}px`);
-      document.documentElement.style.setProperty('--my', `${clientY}px`);
+      ditherLayer?.style.setProperty('--mx', `${clientX}px`);
+      ditherLayer?.style.setProperty('--my', `${clientY}px`);
       mouseFrame = 0;
     });
   }
@@ -189,7 +193,7 @@
   {/if}
 
 
-  <div class="dither-layer"></div>
+  <div class="dither-layer" bind:this={ditherLayer}></div>
   <div class="scanlines"></div>
   <div class="crt-flicker"></div>
   <div class="vignette"></div>

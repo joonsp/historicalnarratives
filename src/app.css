@@ -309,16 +309,21 @@ body {
   display: none;
 }
 
-/* Shoreline shimmer: dotted stroke whose opacity steps like pixel twinkle */
+/* Shoreline shimmer: a static dotted stroke; the twinkle animates only the
+   pane's opacity, which the compositor handles without repainting paths. */
 .leaflet-pane .coast-shimmer {
   stroke: var(--ink); stroke-width: 2.5px; fill: none;
   stroke-dasharray: 1 5; stroke-linecap: square;
   pointer-events: none;
+}
+.shimmer-pane {
+  pointer-events: none;
+  will-change: opacity;
   animation: shore-shimmer 3.2s steps(6) infinite;
 }
 @keyframes shore-shimmer {
-  0%, 100% { opacity: 0.08; stroke-dashoffset: 0; }
-  50%      { opacity: 0.3;  stroke-dashoffset: 3; }
+  0%, 100% { opacity: 0.08; }
+  50%      { opacity: 0.3; }
 }
 
 .dither-layer {
@@ -487,7 +492,7 @@ a:hover { color: var(--rubric); }
   .sea-ship,
   .compass-rose,
   .sea-drifter,
-  .coast-shimmer,
+  .shimmer-pane,
   .spinner,
   .dither-chip { animation: none !important; }
   @keyframes dither-quick {
